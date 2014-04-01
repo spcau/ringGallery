@@ -8,20 +8,8 @@ var	dMain = ndiv('rgmain'),
 	dMenu = ndiv('rgmenu'),
 	dNumber = ndiv('rgnum'),
 	dControl = ndiv('rgctrl'),
-	dProgress = null,
+	dProgress = ndiv('rgprogress'),
 	dIndex = null,
-	gif = 'data:image/gif;base64,',
-	b64Slide = gif+'R0lGODlhDwAPAIAAAP///wAA/yH5BAEKAAEALAAAAAAPAA8AAAIrjAOpC4cOG2LsWWgapS/ho02ZBHaS4oTetHYiu6onmsEj6VrtXX8XvHEUAAA7',
-	b64Index = gif+'R0lGODlhDQANAIAAAP///wAA/yH5BAEKAAEALAAAAAANAA0AAAIchBMGqMqX2orToYuzzrbLV30UuJUmOVJe2KBKAQA7',
-	b64First = gif+'R0lGODlhDwALAIABAP///wAAACH5BAEKAAEALAAAAAAPAAsAAAIeBIJ4qcb+zAoyVnqxPJv3D26aEzbQeGZoxIztlAAFADs=',
-	b64Prev = gif+'R0lGODlhDgALAIABAP///wAAACH5BAEKAAEALAAAAAAOAAsAAAIdjA+HGpDqYESzuWfjvXn7r3ldtVFVJmHGaTGNCxQAOw==',
-	b64Next = gif+'R0lGODlhDgALAIABAP///wAAACH5BAEKAAEALAAAAAAOAAsAAAIdRI6GB5rO2mqQOvuwlbt7vgVYJJFTGS0iJKqtWgAAOw==',
-	b64Last = gif+'R0lGODlhDwALAIABAP///wAAACH5BAEKAAEALAAAAAAPAAsAAAIdRI6GAa35mIsOTqvm1VL7X3EednAWuTSpujBtUwAAOw==',
-	b64Full = gif+'R0lGODlhDgAOAIABAP///wAAACH5BAEKAAEALAAAAAAOAA4AAAIghBGpx+rBzoNNLgMvovvFPjWTBnrRaFmZynGYeaJfeBQAOw==',
-	b64Zoom = gif+'R0lGODlhDQANAIABAP///wAAACH5BAEKAAEALAAAAAANAA0AAAIdjB+gi73PDGxyOlUvOJh3jnxbQoFkeY7lqFIsZBUAOw==',
-	b64Stop = gif+'R0lGODlhCgAKAIAAAP///wAA/yH5BAEKAAEALAAAAAAKAAoAAAIIhI+py+0PYysAOw==',
-	b64Play = gif+'R0lGODlhCQAJAIAAAP///wAA/yH5BAEKAAEALAAAAAAJAAkAAAIPBIIZZrrcEIRvWmoTVdEVADs=',
-	b64Pause = gif+'R0lGODlhCgAKAIAAAP///wAA/yH5BAEKAAEALAAAAAAKAAoAAAIRhBFxi8qWHnQvSlspw1svXgAAOw==',
 	btnSlide, btnStop, btnFirst, btnPrev, btnNext, btnLast, btnIndex, btnZoom, btnPlay, btnPause,
 	npics = pics.length,
 	ipic = 0,
@@ -526,7 +514,7 @@ function gotoPic(n) {
 		setPic(2, ipic + 1);
 	}
 	setTimeout(viewPic, 50);
-	if (slideShow && dProgress) {
+	if (slideShow) {
 		dProgress.firstChild.style.width = (((npics - ssLastPic) + ipic) % (npics + 1) * 100 / npics) + '%';
 	}
 	if (n == 0) {
@@ -555,9 +543,9 @@ function addListener(e, n, fn) {
 	e.addEventListener ?  e.addEventListener(n, fn, false) : e.attachEvent('on' + n, fn);
 }
 
-function addBtn(url, tip, fl, fn) {
+function addBtn(tip, fl, fn, gif) {
 	var btn = ndiv('rgbtn ' + fl);
-	btn.style.backgroundImage = 'url(' + url + ')';
+	btn.style.backgroundImage = 'url(data:image/gif;base64,' + gif + ')';
 	btn.title = tip;
 	btn.onclick = fn;
 	return dMenu.appendChild(btn);
@@ -596,14 +584,12 @@ function stopSlide() {
 	if (!slideShow) {
 		return;
 	}
-	if (ssInterval !== 0) {
+	if (ssInterval != 0) {
 		clearInterval(ssInterval);
 		ssInterval = 0;
 	}
 	slideShow = false;
-	if (dProgress) {
-		dMenu.removeChild(dProgress);
-	}
+	showBtn(dProgress, false);
 	setBtns();
 	setControls();
 }
@@ -636,12 +622,8 @@ function goSlideShow() {
 	ssPause = false;
 	setPic(2, ipic + 1);
 	setBtns();
-	if (dProgress == null) {
-		dProgress = ndiv('rgprogress');
-		dProgress.appendChild(ndiv());
-	}
-	dProgress.firstChild.style.width = '0%';
-	dMenu.appendChild(dProgress);
+	dProgress.firstChild.style.width = '0';
+	showBtn(dProgress, true);
 	if (isvid) {
 		vid.play();
 	}
@@ -871,7 +853,7 @@ this.setGallery = function(p, path) {
 	pics = p;
 	npics = pics.length;
 	ipic = 0;
-	if (dIndex !== null) {
+	if (dIndex) {
 		dMain.removeChild(dIndex);
 		dIndex = null;
 	}
@@ -880,8 +862,28 @@ this.setGallery = function(p, path) {
 	winResize();
 };
 
-function main() {
+function menuBtns() {
 	var doc = document;
+	btnStop = addBtn('Stop', 'rglt', goSlideShow, 'R0lGODlhCgAKAIAAAP///wAA/yH5BAEKAAEALAAAAAAKAAoAAAIIhI+py+0PYysAOw==');
+	btnPlay = addBtn('Play', 'rglt', slidePlayPause, 'R0lGODlhCQAJAIAAAP///wAA/yH5BAEKAAEALAAAAAAJAAkAAAIPBIIZZrrcEIRvWmoTVdEVADs=');
+	btnPause = addBtn('Pause', 'rglt', slidePlayPause, 'R0lGODlhCgAKAIAAAP///wAA/yH5BAEKAAEALAAAAAAKAAoAAAIRhBFxi8qWHnQvSlspw1svXgAAOw==');
+	btnFirst = addBtn('First', 'rglt', picFirst, 'R0lGODlhDwALAIABAP///wAAACH5BAEKAAEALAAAAAAPAAsAAAIeBIJ4qcb+zAoyVnqxPJv3D26aEzbQeGZoxIztlAAFADs=');
+	btnPrev = addBtn('Previous', 'rglt', picPrev, 'R0lGODlhDgALAIABAP///wAAACH5BAEKAAEALAAAAAAOAAsAAAIdjA+HGpDqYESzuWfjvXn7r3ldtVFVJmHGaTGNCxQAOw==');
+	btnNext = addBtn('Next', 'rglt', picNext, 'R0lGODlhDgALAIABAP///wAAACH5BAEKAAEALAAAAAAOAAsAAAIdRI6GB5rO2mqQOvuwlbt7vgVYJJFTGS0iJKqtWgAAOw==');
+	btnLast = addBtn('Last', 'rglt', picLast, 'R0lGODlhDwALAIABAP///wAAACH5BAEKAAEALAAAAAAPAAsAAAIdRI6GAa35mIsOTqvm1VL7X3EednAWuTSpujBtUwAAOw==');
+	if (doc.fullscreenEnabled || doc.webkitFullscreenEnabled || doc.msFullscreenEnabled || doc.mozFullScreenEnabled) {
+		addBtn('Full Screen', 'rgrt', goFull, 'R0lGODlhDgAOAIABAP///wAAACH5BAEKAAEALAAAAAAOAA4AAAIghBGpx+rBzoNNLgMvovvFPjWTBnrRaFmZynGYeaJfeBQAOw==');
+	}
+	btnZoom = addBtn('Open in New Window', 'rgrt', goZoom, 'R0lGODlhDQANAIABAP///wAAACH5BAEKAAEALAAAAAANAA0AAAIdjB+gi73PDGxyOlUvOJh3jnxbQoFkeY7lqFIsZBUAOw==');
+	btnIndex = addBtn('Index', 'rgrt', goIndex, 'R0lGODlhDQANAIAAAP///wAA/yH5BAEKAAEALAAAAAANAA0AAAIchBMGqMqX2orToYuzzrbLV30UuJUmOVJe2KBKAQA7');
+	btnSlide = addBtn('Slide Show', 'rgrt', goSlideShow, 'R0lGODlhDwAPAIAAAP///wAA/yH5BAEKAAEALAAAAAAPAA8AAAIrjAOpC4cOG2LsWWgapS/ho02ZBHaS4oTetHYiu6onmsEj6VrtXX8XvHEUAAA7');
+	dProgress.appendChild(ndiv());
+	showBtn(dProgress, false);
+	dMenu.appendChild(dNumber);
+	dMenu.appendChild(dProgress);
+}
+
+function main() {
 	urlPath = urlPath || '';
 	initCss();
 	addBox(); addBox(); addBox();
@@ -889,22 +891,9 @@ function main() {
 	dMain.onkeydown = keyDown;
 	dMain.appendChild(dScroll);
 	dMain.appendChild(dMenu);
-	btnStop = addBtn(b64Stop, 'Stop', 'rglt', goSlideShow);
-	btnPlay = addBtn(b64Play, 'Play', 'rglt', slidePlayPause);
-	btnPause = addBtn(b64Pause, 'Pause', 'rglt', slidePlayPause);
-	btnFirst = addBtn(b64First, 'First', 'rglt', picFirst);
-	btnPrev = addBtn(b64Prev, 'Previous', 'rglt', picPrev);
-	btnNext = addBtn(b64Next, 'Next', 'rglt', picNext);
-	btnLast = addBtn(b64Last, 'Last', 'rglt', picLast);
-	dMenu.appendChild(dNumber);
-	if (doc.fullscreenEnabled || doc.webkitFullscreenEnabled || doc.msFullscreenEnabled || doc.mozFullScreenEnabled) {
-		addBtn(b64Full, 'Full Screen', 'rgrt', goFull);
-	}
-	btnZoom = addBtn(b64Zoom, 'Open in New Window', 'rgrt', goZoom);
-	btnIndex = addBtn(b64Index, 'Index', 'rgrt', goIndex);
-	btnSlide = addBtn(b64Slide, 'Slide Show', 'rgrt', goSlideShow);
 	dControl.innerHTML = '<div class="rgpause0"></div><div class="rgpause1"></div><div class="rgplay"></div><div class="rgstop"></div>'
 	dMain.appendChild(dControl);
+	menuBtns();
 	showBtn(dControl, false);
 	setBtns();
 	addListener(window, 'resize', winResize);
