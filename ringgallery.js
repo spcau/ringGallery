@@ -811,7 +811,7 @@ function addTouch() {
 		e.stopPropagation ? e.stopPropagation() : e.cancelBubble = true;
 	}
 
-	function moveIt(x) {
+	function moveIt(e, x) {
 		doPrevent(e);
 		if (Math.abs(x - distX) > 2) {
 			doTouch('move', distX = x);
@@ -837,7 +837,7 @@ function addTouch() {
 	});
 	addListener(dScroll, 'touchmove', function(e) {
 		if (inTouch) {
-			moveIt(e.changedTouches[0].pageX - startX);
+			moveIt(e, e.changedTouches[0].pageX - startX);
 		}
 	});
 	addListener(dScroll, 'touchend', function(e) {
@@ -855,7 +855,7 @@ function addTouch() {
 	});
 	addListener(dScroll, 'mousemove', function(e) {
 		if (inMouse) {
-			moveIt((e.pageX || e.clientX) - startX);
+			moveIt(e, (e.pageX || e.clientX) - startX);
 		}
 	});
 	addListener(dScroll, 'mouseup', function(e) {

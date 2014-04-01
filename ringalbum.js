@@ -99,7 +99,7 @@ function ndiv(cl) {
 }
 
 function nText(cl, s) {
-	e = nEl('span', cl);
+	var e = nEl('span', cl);
 	e.innerHTML = s;
 	return e;
 }
