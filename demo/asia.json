@@ -1,0 +1,15 @@
+{
+"title":"ringGallery Demo - Asia",
+"gallery":[
+	{ "photo":"DSC_1699-1024x680.jpg", "thumb":"DSC_1699-sm.jpg" },
+	{ "photo":"DSC_1707-1024x680.jpg", "thumb":"DSC_1707-sm.jpg" },
+	{ "photo":"DSC00075a-1024x768.jpg", "thumb":"DSC00075a-sm.jpg" },
+	{ "photo":"DSC00295a-1024x768.jpg", "thumb":"DSC00295a-sm.jpg" },
+	{ "photo":"DSC00355-1024x768.jpg", "thumb":"DSC00355-sm.jpg" },
+	{ "photo":"DSC00441-1024x768.jpg", "thumb":"DSC00441-sm.jpg" },
+	{ "photo":"DSC00507a-1024x768.jpg", "thumb":"DSC00507a-sm.jpg" },
+	{ "photo":"DSC03758-1024x768.jpg", "thumb":"DSC03758-sm.jpg" },
+	{ "photo":"DSC03778-1024x574.jpg", "thumb":"DSC03778-sm.jpg" },
+	{ "photo":"DSC03806-1024x768.jpg", "thumb":"DSC03806-sm.jpg" }
+]
+}

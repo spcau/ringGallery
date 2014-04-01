@@ -1,0 +1,14 @@
+{
+"title":"ringGallery Demo - Egypt",
+"gallery":[
+	{ "photo":"DSC00017-1024x768.jpg", "thumb":"DSC00017-sm.jpg" },
+	{ "photo":"DSC00064-1024x768.jpg", "thumb":"DSC00064-sm.jpg" },
+	{ "photo":"DSC00075-1024x768.jpg", "thumb":"DSC00075-sm.jpg" },
+	{ "photo":"DSC_1315-1024x680.jpg", "thumb":"DSC_1315-sm.jpg" },
+	{ "photo":"DSC00128-1024x768.jpg", "thumb":"DSC00128-sm.jpg" },
+	{ "photo":"DSC00295-1024x768.jpg", "thumb":"DSC00295-sm.jpg" },
+	{ "photo":"DSC00384-1024x768.jpg", "thumb":"DSC00384-sm.jpg" },
+	{ "photo":"DSC_1474-1024x680.jpg", "thumb":"DSC_1474-sm.jpg" },
+	{ "photo":"DSC00507-1024x768.jpg", "thumb":"DSC00507-sm.jpg" }
+]
+}

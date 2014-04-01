@@ -1,0 +1,26 @@
+{
+"title":"ringGallery Demo - Europe",
+"gallery":[
+	{ "photo":"DSC00613-1024x768.jpg", "thumb":"DSC00613-sm.jpg" },
+	{ "photo":"DSC00629-1024x768.jpg", "thumb":"DSC00629-sm.jpg" },
+	{ "photo":"DSC00663-1024x768.jpg", "thumb":"DSC00663-sm.jpg" },
+	{ "photo":"DSC00780-1024x768.jpg", "thumb":"DSC00780-sm.jpg" },
+	{ "photo":"DSC00923-1024x574.jpg", "thumb":"DSC00923-sm.jpg" },
+	{ "photo":"DSC00941-1024x768.jpg", "thumb":"DSC00941-sm.jpg" },
+	{ "photo":"DSC00944-1024x768.jpg", "thumb":"DSC00944-sm.jpg" },
+	{ "photo":"DSC02025-1024x768.jpg", "thumb":"DSC02025-sm.jpg" },
+	{ "photo":"DSC02151-1024x768.jpg", "thumb":"DSC02151-sm.jpg" },
+	{ "photo":"DSC02329-1024x768.jpg", "thumb":"DSC02329-sm.jpg" },
+	{ "photo":"DSC02532-1024x768.jpg", "thumb":"DSC02532-sm.jpg" },
+	{ "photo":"DSC02585-1024x768.jpg", "thumb":"DSC02585-sm.jpg" },
+	{ "photo":"DSC02629-1024x768.jpg", "thumb":"DSC02629-sm.jpg" },
+	{ "photo":"DSC02670-1024x768.jpg", "thumb":"DSC02670-sm.jpg" },
+	{ "photo":"DSC02672-1024x768.jpg", "thumb":"DSC02672-sm.jpg" },
+	{ "photo":"DSC02684-1024x400.jpg", "thumb":"DSC02684-sm.jpg" },
+	{ "photo":"DSC02714-1024x768.jpg", "thumb":"DSC02714-sm.jpg" },
+	{ "photo":"DSC02719-1024x768.jpg", "thumb":"DSC02719-sm.jpg" },
+	{ "photo":"DSC02751-1024x768.jpg", "thumb":"DSC02751-sm.jpg" },
+	{ "photo":"DSC02802-1024x768.jpg", "thumb":"DSC02802-sm.jpg" },
+	{ "photo":"DSC02902-1024x768.jpg", "thumb":"DSC02902-sm.jpg" }
+]
+}

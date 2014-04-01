@@ -1,0 +1,9 @@
+{
+"title":"ringGallery Demo",
+"albums":[ 
+"egypt.json", 
+"asia.json", 
+"europe.json", 
+"rocks.json"
+]
+}

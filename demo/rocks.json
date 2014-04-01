@@ -1,0 +1,14 @@
+{
+"title":"ringGallery Demo - Rocks",
+"gallery":[
+	{ "photo":"DSC01411-1024x768.jpg", "thumb":"DSC01411-sm.jpg" },
+	{ "photo":"DSC01553-1024x768.jpg", "thumb":"DSC01553-sm.jpg" },
+	{ "photo":"DSC01691-1024x768.jpg", "thumb":"DSC01691-sm.jpg" },
+	{ "photo":"DSC01794-1024x768.jpg", "thumb":"DSC01794-sm.jpg" },
+	{ "photo":"DSC01802-1024x768.jpg", "thumb":"DSC01802-sm.jpg" },
+	{ "photo":"DSC01806-1024x768.jpg", "thumb":"DSC01806-sm.jpg" },
+	{ "photo":"DSC04349-1024x768.jpg", "thumb":"DSC04349-sm.jpg" },
+	{ "photo":"DSC04487-1024x768.jpg", "thumb":"DSC04487-sm.jpg" },
+	{ "photo":"DSC04505-1024x768.jpg", "thumb":"DSC04505-sm.jpg" }
+]
+}
