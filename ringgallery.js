@@ -413,15 +413,15 @@ function vidStop(vid) {
 	}
 }
 
-function doVidClick() {
+function doClick() {
 	var vid = getVid(1),
 		isvid = (hasVideo && !isHide(vid.parentNode));
 	if (!isvid || vid.ended) {
-		return false;
+		slideShow ? slidePlayPause() : picNext();
+	} else {
+		vid.paused ? vid.play() : vid.pause();
+		setControls();
 	}
-	vid.paused ? vid.play() : vid.pause();
-	setControls();
-	return true;
 }
 
 function t2s(s) {
@@ -708,12 +708,6 @@ function goIndex() {
 }
 
 function doTouch(phase, dx) {
-	if (slideShow && phase == 'abort') {
-		if (!doVidClick()) {
-			slidePlayPause();
-		}
-		return;
-	}
 	var ww = dMain.clientWidth, xx;
 	if (phase == 'move') {
 		xx = setScrollX(dx + touchX);
@@ -734,9 +728,7 @@ function doTouch(phase, dx) {
 			gotoPic(0);
 		}
 	} else if (phase == 'abort') {
-		if (!doVidClick()) {
-			picNext();
-		}
+		doClick();
 	}
 }
 
@@ -754,7 +746,6 @@ function winResize() {
 }
 
 function keyDown(e) {
-	var z;
 	e = e || window.event;
 	if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) {
 		return;
@@ -778,9 +769,7 @@ function keyDown(e) {
 		}
 		break;
 	case 32:
-		if (!doVidClick()) {
-			slideShow ? slidePlayPause() : picNext();
-		}
+		doClick();
 		break;
 	}
 }
@@ -853,7 +842,7 @@ function addTouch() {
 this.setGallery = function(p, path) {
 	urlPath = path || '';
 	pics = p;
-	npics = pics.length;
+	npics = p.length;
 	ipic = 0;
 	if (dIndex) {
 		dMain.removeChild(dIndex);
@@ -894,9 +883,9 @@ function main() {
 	dMain.appendChild(dScroll);
 	dMain.appendChild(dMenu);
 	dControl.innerHTML = '<div class="rgpause0"></div><div class="rgpause1"></div><div class="rgplay"></div><div class="rgstop"></div>'
+	showBtn(dControl, false);
 	dMain.appendChild(dControl);
 	menuBtns();
-	showBtn(dControl, false);
 	setBtns();
 	addListener(window, 'resize', winResize);
 	addListener(window, 'orientationchange', winResize);
