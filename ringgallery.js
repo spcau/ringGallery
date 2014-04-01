@@ -390,7 +390,7 @@ function setPic(n, p) {
 			vid.poster = g.poster ? urlPath + g.poster : '';
 			vidTimer.call(vid);
 		} else {
-			vidbox.style.backgroundImage = 'url(' + urlPath + g.poster + ')';
+			vidbox.style.backgroundImage = g.poster ? 'url(' + urlPath + g.poster + ')' : '';
 		}
 		hide(wait);
 	} else {
@@ -431,30 +431,32 @@ function t2s(s) {
 }
 
 function vidTimer() {
+	if (this != getVid(1)) {
+		return;
+	}
 	var vid = this,
 		vbar = vid.nextSibling,
 		vtime = vbar.nextSibling,
 		w = '0', s = '';
-	if (vid == getVid(1)) {
-		if (!isNaN(vid.duration) && !isNaN(vid.currentTime)) {
-			w = (vid.currentTime * 100 / vid.duration) + '%';
-			s = t2s(vid.currentTime) + '&thinsp;/&thinsp;' + t2s(vid.duration);
-		}
-		vbar.lastChild.style.width = w;
-		vtime.innerHTML = s;
+	if (!isNaN(vid.duration)) {
+		w = (vid.currentTime * 100 / vid.duration) + '%';
+		s = t2s(vid.currentTime) + '&thinsp;/&thinsp;' + t2s(vid.duration);
 	}
+	vbar.lastChild.style.width = w;
+	vtime.innerHTML = s;
 }
 
 function vidBuffer() {
+	if (this != getVid(1)) {
+		return;
+	}
 	var vid = this,
 		vbar = vid.nextSibling
 		w = '0'
-	if (vid == getVid(1)) {
-		if (!isNaN(vid.duration) && vid.buffered.end(0)) {
-			w = (vid.buffered.end(0) * 100 / vid.duration) + '%';
-		}
-		vbar.firstChild.style.width = w;
+	if (!isNaN(vid.duration) && vid.buffered.end(0)) {
+		w = (vid.buffered.end(0) * 100 / vid.duration) + '%';
 	}
+	vbar.firstChild.style.width = w;
 }
 
 function setControls() {
@@ -471,10 +473,10 @@ function setControls() {
 	} else if (slideShow && ssPause) {
 		type = CPAUSE;
 	}
-	showBtn(dControl, type != 0);
-	if (type != 0) {
+	showBtn(dControl, type);
+	if (type) {
 		for (i = 0; i < 4; type >>= 1, i++) {
-			showBtn(dControl.childNodes[i], (type & 1) != 0);
+			showBtn(dControl.childNodes[i], type & 1);
 		}
 	}
 }
