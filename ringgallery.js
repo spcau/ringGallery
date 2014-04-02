@@ -10,7 +10,7 @@ var	dMain = ndiv('rgmain'),
 	dControl = ndiv('rgctrl'),
 	dProgress = ndiv('rgprogress'),
 	dIndex = null,
-	btnSlide, btnStop, btnFirst, btnPrev, btnNext, btnLast, btnIndex, btnZoom, btnPlay, btnPause,
+	btnSlide, btnStop, btnFirst, btnPrev, btnNext, btnLast, btnIndex, btnPlay, btnPause,
 	npics = pics.length,
 	ipic = 0,
 	slideShow = false,
@@ -126,14 +126,12 @@ function initCss() {
 	add('.rgprogress>div',
 		cssBgGrd(240,1,160,1) +
 		'border:1px outset #c0c0c0;' +
-		'height:0.4em;');
+		'height:0.4em');
 
 	add('.rgnum',
 		'display:inline-block;' +
-		'text-align:center;' +
-		'padding:0.4em 0.5em 0 0.5em;' +
-		'color:#ffffff;' +
-		'height:100%');
+		'margin-top:0.4em;' +
+		'color:#ffffff');
 
 	add('.rgbtn',
 		'display:inline-block;' +
@@ -610,7 +608,6 @@ function setBtns() {
 	showBtn(btnNext, n);
 	showBtn(btnLast, n);
 	showBtn(btnIndex, n);
-	showBtn(btnZoom, n);
 }
 
 function goSlideShow() {
@@ -644,13 +641,6 @@ function slidePlayPause() {
 	ssPause = !ssPause;
 	setBtns();
 	setControls();
-}
-
-function goZoom() {
-	var img = getImg(1);
-	if (!isHide(img.parentNode)) {
-		window.open(img.src);
-	}
 }
 
 this.stopGallery = function() {
@@ -868,7 +858,6 @@ function menuBtns() {
 	if (doc.fullscreenEnabled || doc.webkitFullscreenEnabled || doc.msFullscreenEnabled || doc.mozFullScreenEnabled) {
 		addBtn('Full Screen', 'rgrt', goFull, 'R0lGODlhDgAOAIABAP///wAAACH5BAEKAAEALAAAAAAOAA4AAAIghBGpx+rBzoNNLgMvovvFPjWTBnrRaFmZynGYeaJfeBQAOw==');
 	}
-	btnZoom = addBtn('Open in New Window', 'rgrt', goZoom, 'R0lGODlhDQANAIABAP///wAAACH5BAEKAAEALAAAAAANAA0AAAIdjB+gi73PDGxyOlUvOJh3jnxbQoFkeY7lqFIsZBUAOw==');
 	btnIndex = addBtn('Index', 'rgrt', goIndex, 'R0lGODlhDQANAIAAAP///wAA/yH5BAEKAAEALAAAAAANAA0AAAIchBMGqMqX2orToYuzzrbLV30UuJUmOVJe2KBKAQA7');
 	btnSlide = addBtn('Slide Show', 'rgrt', goSlideShow, 'R0lGODlhDwAPAIAAAP///wAA/yH5BAEKAAEALAAAAAAPAA8AAAIrjAOpC4cOG2LsWWgapS/ho02ZBHaS4oTetHYiu6onmsEj6VrtXX8XvHEUAAA7');
 	dProgress.appendChild(ndiv());
