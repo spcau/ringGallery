@@ -19,7 +19,6 @@ var	dMain = ndiv('rgmain'),
 	bgZoom,
 	ssLastPic = 0, ssInterval = 0, ssNextTime = 0, ssPause = false,
 	SS_DELAY = 3000, TIMER_MOVE_MS = 150, TIMER_SLIDESHOW_MS = 900,
-	CPAUSE = 0x03, CPLAY = 0x04, CSTOP = 0x08,
 	scrollX = 0, touchX = 0,
 	htmlWait;
 
@@ -66,7 +65,7 @@ function initCss() {
 		absinline +
 		'overflow:hidden;' +
 		'text-align:center;' +
-		cssBgGrd(48,48,48,1,16,16,16,1) +
+		cssBgGrd(48,1,16,1) +
 		'width:100%;bottom:0;height:' + MBAR);
 
 	add('.rgscroll',
@@ -98,7 +97,7 @@ function initCss() {
 
 	add('.rgvbar0',
 		absinline +
-		cssBgGrd(255,255,255,0.8,220,220,220,0.8) +
+		cssBgGrd(255,0.8,220,0.8) +
 		'border:1px outset #c0c0c0;' +
 		'left:0;height:5px');
 
@@ -112,7 +111,7 @@ function initCss() {
 		'padding:2px 4px;' +
 		'margin-bottom:6px;' +
 		'color:#ffffff;' +
-		cssBgGrd(32,32,32,0.7,32,32,32,0.7) +
+		cssBgGrd(32,0.7,32,0.7) +
 		'font-size:0.9em;' +
 		'bottom:0;height:1em');
 
@@ -125,7 +124,7 @@ function initCss() {
 		'width:8em');
 
 	add('.rgprogress>div',
-		cssBgGrd(240,240,240,1,160,160,160,1) +
+		cssBgGrd(240,1,160,1) +
 		'border:1px outset #c0c0c0;' +
 		'height:0.4em;');
 
@@ -153,7 +152,7 @@ function initCss() {
 		absinline +
 		'pointer-events:none;' +
 		'top:50%;left:50%;width:10em;height:10em;' +
-		cssBgGrd(130,130,130,0.9,99,99,99,0.9) +
+		cssBgGrd(130,0.9,99,0.9) +
 		'box-shadow:8px 8px 16px 0 #202020;' +
 		'margin:-5em 0 0 -5em;' +
 		cssfx('border-radius:2em;'));
@@ -227,20 +226,20 @@ function initCss() {
 			'font:bold 3em;' +
 			'padding:0.2em 0.5em' +
 			'color:#ffffff;' +
-			cssBgGrd(60,60,60,0.7,40,40,40,0.7));
+			cssBgGrd(60,0.7,40,0.7));
 		htmlWait = 'Loading...';
 	}
 }
 
-function c2h(r,g,b,a) {
-	var h = (a*255)<<24|r<<16|g<<8|b;
+function c2h(c,a) {
+	var h = (a*255)<<24|c<<16|c<<8|c;
 	return (h < 0 ? 0xFFFFFFFF + h + 1 : h).toString(16);
 }
 
-function cssBgGrd(r0,g0,b0,a0,r1,g1,b1,a1) {
-	var h0 = c2h(r0,g0,b0,a0),
-		h1 = c2h(r1,g1,b1,a1);
-	return 'background:none;' + cssfx2('background:','linear-gradient(top,rgba('+r0+','+g0+','+b0+','+a0+'),rgba('+r1+','+b1+','+g1+','+a1+'));') +
+function cssBgGrd(c0,a0,c1,a1) {
+	var h0 = c2h(c0,a0),
+		h1 = c2h(c1,a1);
+	return 'background:none;' + cssfx2('background:','linear-gradient(top,rgba('+c0+','+c0+','+c0+','+a0+'),rgba('+c1+','+c1+','+c1+','+a1+'));') +
 		"filter:progid:DXImageTransform.Microsoft.gradient(startColorStr='#" + h0 + "',endColorStr='#" + h1 + "');";
 }
 
@@ -252,6 +251,10 @@ function nEl(n, c) {
 
 function ndiv(c) {
 	return nEl('div', c);
+}
+
+function nspan(c) {
+	return nEl('span', c);
 }
 
 function cssfx(s) {
@@ -466,12 +469,12 @@ function setControls() {
 
 	if (isvid) {
 		if (vid.ended) {
-			type = CSTOP;
+			type = 0x08;
 		} else if (vid.paused) {
-			type = vid.currentTime == 0 ? CPLAY : CPAUSE;
+			type = vid.currentTime == 0 ? 0x04 : 0x03;
 		}
 	} else if (slideShow && ssPause) {
-		type = CPAUSE;
+		type = 0x03;
 	}
 	showBtn(dControl, type);
 	if (type) {
@@ -691,7 +694,7 @@ function chooseIndex(e) {
 }
 
 function goIndex() {
-	if (dIndex === null) {
+	if (dIndex == null) {
 		var dv = ndiv();
 		for (var i = 0; i < npics; i++) {
 			var img= new Image();
