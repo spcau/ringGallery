@@ -283,14 +283,12 @@ function addBox() {
 	box.appendChild(wait);
 	dScroll.appendChild(box);
 	img.style.maxWidth = '100%';
-	img.onload = imgCallback;
-	img.onerror = imgCallback;
+	img.onload = img.onerror = imgCallback;
 	if (vid.play) {
 		hasVideo = true;
 		vid.preload = 'none';
 		vid.controls = false;
-		vid.onplay = setControls;
-		vid.onpause = setControls;
+		vid.onplay = vid.onpause = setControls;
 		vid.onreadystatechange = setControls;
 		addListener(vid, 'timeupdate', vidTimer);
 		addListener(vid, 'progress', vidBuffer);
@@ -332,6 +330,10 @@ function showBtn(e, b) {
 
 function unHide(e) {
 	e.style.visibility = 'visible';
+}
+
+function hide(e) {
+	e.style.visibility = 'hidden';
 }
 
 function isHide(e) {
