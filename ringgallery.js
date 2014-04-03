@@ -6,9 +6,9 @@ function ringGallery(dOuter, pics, urlPath) {
 var	dMain = ndiv('rgmain'),
 	dScroll = ndiv('rgscroll'),
 	dMenu = ndiv('rgmenu'),
-	dNumber = ndiv('rgnum'),
 	dControl = ndiv('rgctrl'),
 	dProgress = ndiv('rgprogress'),
+	dNumber = ndiv(),
 	dIndex = null,
 	btnSlide, btnStop, btnFirst, btnPrev, btnNext, btnLast, btnIndex, btnPlay, btnPause,
 	npics = pics.length,
@@ -58,6 +58,7 @@ function initCss() {
 		absinline +
 		'text-align:left;' +
 		'background:#000000;' +
+		'color:#ffffff;' +
 		'width:100%;height:100%;' +
 		cssfx('user-select:none;'));
 
@@ -65,7 +66,9 @@ function initCss() {
 		absinline +
 		'overflow:hidden;' +
 		'text-align:center;' +
+		'vertical-align:middle;' +
 		cssBgGrd(48,1,16,1) +
+		'line-height:' + MBAR + ';' +
 		'width:100%;bottom:0;height:' + MBAR);
 
 	add('.rgscroll',
@@ -110,7 +113,6 @@ function initCss() {
 		absinline +
 		'padding:2px 4px;' +
 		'margin-bottom:6px;' +
-		'color:#ffffff;' +
 		cssBgGrd(32,0.7,32,0.7) +
 		'font-size:0.9em;' +
 		'bottom:0;height:1em');
@@ -128,10 +130,6 @@ function initCss() {
 		'border:1px outset #c0c0c0;' +
 		'height:0.4em');
 
-	add('.rgnum',
-		'display:inline-block;' +
-		'margin-top:0.4em;' +
-		'color:#ffffff');
 
 	add('.rgbtn',
 		'display:inline-block;' +
@@ -222,8 +220,7 @@ function initCss() {
 			'text-align:center;' +
 			'margin:auto;' +
 			'font:bold 3em;' +
-			'padding:0.2em 0.5em' +
-			'color:#ffffff;' +
+			'padding:0.2em 0.5em;' +
 			cssBgGrd(60,0.7,40,0.7));
 		htmlWait = 'Loading...';
 	}
@@ -249,10 +246,6 @@ function nEl(n, c) {
 
 function ndiv(c) {
 	return nEl('div', c);
-}
-
-function nspan(c) {
-	return nEl('span', c);
 }
 
 function cssfx(s) {
@@ -335,10 +328,6 @@ function imgResize(img) {
 
 function showBtn(e, b) {
 	e.style.display = b ? 'inline-block' : 'none';
-}
-
-function hide(e) {
-	e.style.visibility = 'hidden';
 }
 
 function unHide(e) {
@@ -462,23 +451,21 @@ function vidBuffer() {
 
 function setControls() {
 	var	vid = getVid(1),
-		isvid = (hasVideo && !isHide(vid.parentNode)),
-		type = 0, i;
+		type = -1, i, c;
 
-	if (isvid) {
+	if (hasVideo && !isHide(vid.parentNode)) {
 		if (vid.ended) {
-			type = 0x08;
+			type = 2;
 		} else if (vid.paused) {
-			type = vid.currentTime == 0 ? 0x04 : 0x03;
+			type = vid.currentTime == 0 ? 1 : 0;
 		}
 	} else if (slideShow && ssPause) {
-		type = 0x03;
+		type = 0;
 	}
-	showBtn(dControl, type);
-	if (type) {
-		for (i = 0; i < 4; type >>= 1, i++) {
-			showBtn(dControl.childNodes[i], type & 1);
-		}
+	type >= 0 ? unHide(dControl) : hide(dControl);
+	for (i = 0; i < 3; i++) {
+		c = dControl.childNodes[i];
+		type == i ? unHide(c) : hide(c);
 	}
 }
 
@@ -632,15 +619,14 @@ function goSlideShow() {
 }
 
 function slidePlayPause() {
-	if (!slideShow) {
-		return;
+	if (slideShow) {
+		if (ssPause) {
+			ssNextTime = new Date().getTime() + SS_DELAY;
+		}
+		ssPause = !ssPause;
+		setBtns();
+		setControls();
 	}
-	if (ssPause) {
-		ssNextTime = new Date().getTime() + SS_DELAY;
-	}
-	ssPause = !ssPause;
-	setBtns();
-	setControls();
 }
 
 this.stopGallery = function() {
@@ -874,8 +860,8 @@ function main() {
 	dMain.onkeydown = keyDown;
 	dMain.appendChild(dScroll);
 	dMain.appendChild(dMenu);
-	dControl.innerHTML = '<div class="rgpause0"></div><div class="rgpause1"></div><div class="rgplay"></div><div class="rgstop"></div>'
-	showBtn(dControl, false);
+	dControl.innerHTML = '<div><div class="rgpause0"></div><div class="rgpause1"></div></div><div class="rgplay"></div><div class="rgstop"></div>'
+	hide(dControl);
 	dMain.appendChild(dControl);
 	menuBtns();
 	setBtns();
