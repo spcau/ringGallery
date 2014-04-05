@@ -8,9 +8,9 @@ var	dMain = ndiv('rgmain'),
 	dBottom = ndiv('rgbottom'),
 	dMenu = ndiv('rgmenu'),
 	dControl = ndiv('rgctrl'),
-	dProgress = ndiv('rgprogress'),
-	dVidbar = ndiv('rgvbar'),
-	dVidtime = ndiv('rgvtime'),
+	dVbar = ndiv('rgvbar'),
+	dVmeter = ndiv('rgvmtr'),
+	dVtime = ndiv('rgvtime'),
 	dNumber = ndiv('rgnum'),
 	dIndex = null,
 	btnSlide, btnStop, btnFirst, btnPrev, btnNext, btnLast, btnIndex, btnPlay, btnPause, btnBack,
@@ -30,17 +30,15 @@ function initCss() {
 	var MBAR = '2.8em',
 		el = nEl('style'),
 		css = el.style, i, s,
-		absinline = 'position:absolute;display:inline-block;',
-		prefix = ['webkit','Moz','O','ms'];
+		absinline = 'position:absolute;display:inline-block;';
 
 	function prop(n1, n2) {
-		var i, s;
-		for (i = -1 ; i < 4; i++) {
-			s = (i < 0) ? n1 : prefix[i] + n2;
-			if (s in css)
+		var i, s, p = ['webkit','Moz','O','ms'];
+		for (i = 0 ; i < 4; i++) {
+			if ((s = p[i] + n2) in css)
 				return s;
 		}
-		return null;
+		return n1 in css ? n1 : null;
 	}
 
 	function add(a,b) {
@@ -73,7 +71,7 @@ function initCss() {
 		absinline +
 		'text-align:center;' +
 		'vertical-align:middle;' +
-		cssBgGrd(48,0.7,16,0.7) +
+		cssBgGrd(48,.7,16,.7) +
 		'line-height:' + MBAR + ';' +
 		'width:100%;top:100%;height:' + MBAR);
 
@@ -88,10 +86,9 @@ function initCss() {
 		'overflow:hidden;' +
 		'cursor:pointer');
 
+	s = 'background-repeat:no-repeat;background-position:center center;';
 	add('.rgimgbox',
-		absinline +
-		'background-repeat:no-repeat;' +
-		'background-position:center center;' +
+		absinline + s +
 		'background-size:contain;' +
 		'height:100%;width:100%');
 
@@ -101,72 +98,59 @@ function initCss() {
 
 	add('.rgvbar',
 		absinline +
-		'background-color:rgba(48,48,48,0.3);' +
-		'width:100%;height:6px;left:0;bottom:100%');
+		'text-align:left;' +
+		'left:0;width:100%;height:2em;bottom:100%');
 
-	add('.rgvbar0',
+	add('.rgvmtr',
 		absinline +
-		cssBgGrd(255,0.8,220,0.8) +
+		'background-color:rgba(48,48,48,.3);' +
+		'width:100%;height:6px;bottom:0');
+
+	add('.rgvmtr0',
+		absinline +
+		cssBgGrd(255,.8,220,.8) +
 		'border:1px outset #c0c0c0;' +
 		'left:0;height:5px');
 
-	add('.rgvbar1',
+	add('.rgvmtr1',
 		absinline +
-		'background:rgba(255,255,255,0.2);' +
+		'background:rgba(255,255,255,.2);' +
 		'left:0;height:5px');
 
 	add('.rgvtime',
 		absinline +
-		'padding:2px 4px;' +
-		'vertical-align:middle;' +
-		'margin-bottom:6px;' +
-		cssBgGrd(32,0.7,32,0.7) +
-		'font-size:0.9em;' +
+		cssBgGrd(32,.7,32,.7) +
+		'padding:3px;' +
+		'font-size:.9em;' +
 		'line-height:1em;' +
-		'left:0;height:1em;bottom:100%');
+		'left:0;bottom:6px');
 
 	add('.rgnum',
 		absinline +
 		'font-size:1.2em');
 
-	add('.rgprogress',
-		'display:inline-block;' +
-		'float:left;' +
-		'border:1px inset #505050;' +
-		'margin:1.0em 0.5em;' +
-		'width:8em');
-
-	add('.rgprogress>div',
-		cssBgGrd(240,1,160,1) +
-		'border:1px outset #c0c0c0;' +
-		'height:0.5em');
-
-
 	add('.rgbtn',
 		'display:inline-block;' +
 		'cursor:pointer;' +
 		'width:' + MBAR + ';height:100%;' +
-		'border:1px outset #505050;' +
-		'background-repeat:no-repeat;' +
-		'background-position:center center');
+		'border:1px outset #484848;' + s);
 
 	add('.rgbtn:hover', 'background-color:#404040');
-	add('.rglt', 'float:left');
-	add('.rgrt', 'float:right');
 
 	add('.rgctrl',
 		absinline +
 		'pointer-events:none;' +
 		'top:50%;left:50%;width:10em;height:10em;' +
-		cssBgGrd(130,0.9,99,0.9) +
+		cssBgGrd(130,.9,99,.9) +
 		'box-shadow:8px 8px 16px 0 #202020;' +
-		'margin:-5em 0 0 -5em;' +
+		'margin:-5em;' +
 		cssfx('border-radius:2em;'));
 
 	s = absinline + 'background:#ffffff;';
-	add('.rgpause0', s + 'top:25%;left:32%;width:13%;bottom:25%');
-	add('.rgpause1', s + 'top:25%;right:32%;width:13%;bottom:25%');
 	add('.rgstop', s + 'top:30%;left:30%;right:30%;bottom:30%');
+	s += 'top:25%;width:13%;bottom:25%;';
+	add('.rgpause0', s + 'left:32%');
+	add('.rgpause1', s + 'right:32%');
 	add('.rgplay', absinline +
 		'width:0;height:0;top:20%;left:32%;' +
 		'border-top:3em solid transparent;' +
@@ -175,9 +159,8 @@ function initCss() {
 
 	add('.rgidx',
 		absinline +
-		'width:100%;height:100%;z-index:10;' +
-		'background:#000000;' +
-		'background:rgba(0,0,0,0.7)');
+		'width:100%;height:100%;' +
+		cssBgGrd(0,.7,0,.7));
 
 	add('.rgidx>div',
 		absinline +
@@ -194,8 +177,7 @@ function initCss() {
 		'background:#e0e0e0;' +
 		'cursor:pointer');
 
-	add('.rgidx>div>img:hover',
-		'opacity:0.5');
+	add('.rgidx>div>img:hover', 'opacity:.5');
 
 	if (sTransition) {
 		add('div.rgwait',
@@ -212,7 +194,7 @@ function initCss() {
 			cssfx('animation:waitfade 1s linear infinite;') +
 			cssfx('border-radius:4em;'));
 
-		s = 'from {opacity:1;} to {opacity:0.1;}';
+		s = 'from {opacity:1;} to {opacity:.1;}';
 		add('@keyframes waitfade', s);
 		add('@-webkit-keyframes waitfade', s);
 		htmlWait = '';
@@ -230,8 +212,8 @@ function initCss() {
 			'text-align:center;' +
 			'margin:auto;' +
 			'font:bold 3em;' +
-			'padding:0.2em 0.5em;' +
-			cssBgGrd(60,0.7,40,0.7));
+			'padding:.5em;' +
+			cssBgGrd(60,.7,40,.7));
 		htmlWait = 'Loading...';
 	}
 }
@@ -242,8 +224,7 @@ function c2h(c,a) {
 }
 
 function cssBgGrd(c0,a0,c1,a1) {
-	var h0 = c2h(c0,a0),
-		h1 = c2h(c1,a1);
+	var h0 = c2h(c0,a0), h1 = c2h(c1,a1);
 	return 'background:none;' + cssfx2('background:','linear-gradient(top,rgba('+c0+','+c0+','+c0+','+a0+'),rgba('+c1+','+c1+','+c1+','+a1+'));') +
 		"filter:progid:DXImageTransform.Microsoft.gradient(startColorStr='#" + h0 + "',endColorStr='#" + h1 + "');";
 }
@@ -415,16 +396,16 @@ function vidTimer() {
 		w = (vid.currentTime * 100 / vid.duration) + '%';
 		s = t2s(vid.currentTime) + ' / ' + t2s(vid.duration);
 	}
-	dVidbar.lastChild.style.width = w;
-	dVidtime.innerHTML = s;
+	dVmeter.lastChild.style.width = w;
+	dVtime.innerHTML = s;
+	unHide(dVbar);
 }
 
 function vidBuffer() {
 	var vid = this, w = '0'
-	if (vid == getVid(1) && vid.duration && vid.buffered.end(0)) {
+	if (vid == getVid(1) && vid.duration && vid.buffered.end(0))
 		w = (vid.buffered.end(0) * 100 / vid.duration) + '%';
-	}
-	dVidbar.firstChild.style.width = w;
+	dVmeter.firstChild.style.width = w;
 }
 
 function setControls() {
@@ -432,19 +413,16 @@ function setControls() {
 		type = -1, 
 		v = false,
 		i, c;
-
 	if (hasVideo && !isHide(vid.parentNode)) {
-		if (vid.ended) {
+		if (vid.ended)
 			type = 2;
-		} else if (vid.paused) {
+		else if (vid.paused)
 			type = vid.currentTime == 0 ? 1 : 0;
-		}
-		v  = true;
+		v  = vid.duration;
 	} else if (slideShow && ssPause) {
 		type = 0;
 	}
-	v ? unHide(dVidbar) : hide(dVidbar);
-	v ? unHide(dVidtime) : hide(dVidtime);
+	v ? unHide(dVbar) : hide(dVbar);
 	type >= 0 ? unHide(dControl) : hide(dControl);
 	for (i = 0; i < 3; i++) {
 		c = dControl.childNodes[i];
@@ -487,9 +465,7 @@ function gotoPic(n) {
 		setPic(2, ipic + 1);
 	}
 	setTimeout(viewPic, 50);
-	if (slideShow)
-		dProgress.firstChild.style.width = (((npics - ssLastPic) + ipic) % (npics + 1) * 100 / npics) + '%';
-	else
+	if (!slideShow)
 		menuPeek();
 	if (n == 0)
 		dMain.focus();
@@ -516,9 +492,10 @@ function addListener(e, n, fn) {
 	e.addEventListener ?  e.addEventListener(n, fn, false) : e.attachEvent('on' + n, fn);
 }
 
-function addBtn(tip, fl, fn, gif) {
-	var btn = ndiv('rgbtn ' + fl);
+function addBtn(tip, flt, fn, gif) {
+	var btn = ndiv('rgbtn');
 	btn.style.backgroundImage = 'url(data:image/gif;base64,' + gif + ')';
+	btn.style.cssFloat = flt;
 	btn.title = tip;
 	btn.onclick = fn;
 	return dMenu.appendChild(btn);
@@ -560,7 +537,6 @@ function stopSlide() {
 		ssInterval = 0;
 	}
 	slideShow = false;
-	showBtn(dProgress, false);
 	setBtns();
 	setControls();
 }
@@ -592,8 +568,6 @@ function goSlideShow() {
 	ssPause = false;
 	setPic(2, ipic + 1);
 	setBtns();
-	dProgress.firstChild.style.width = '0';
-	showBtn(dProgress, true);
 	if (isvid)
 		vid.play();
 }
@@ -651,20 +625,21 @@ function goBack() {
 }
 
 function goIndex() {
-	if (dIndex == null) {
-		var dv = ndiv();
-		for (var i = 0; i < npics; i++) {
-			var img= new Image();
-			img.src = urlPath + pics[i].thumb;
-			img.id = i;
-			img.onclick = chooseIndex;
-			dv.appendChild(img);
-		}
-		dIndex = ndiv('rgidx');
-		dIndex.onclick = function(){ hide(dIndex); };
-		dMain.appendChild(dIndex).appendChild(dv);
+	if (dIndex) {
+		unHide(dIndex);
+		return;
 	}
-	unHide(dIndex);
+	var dv = ndiv();
+	for (var i = 0; i < npics; i++) {
+		var img= new Image();
+		img.src = urlPath + pics[i].thumb;
+		img.id = i;
+		img.onclick = chooseIndex;
+		dv.appendChild(img);
+	}
+	dIndex = ndiv('rgidx');
+	dIndex.onclick = function(){ hide(dIndex); };
+	dMain.appendChild(dIndex).appendChild(dv);
 }
 
 function doTouch(phase, sx, dx) {
@@ -673,7 +648,7 @@ function doTouch(phase, sx, dx) {
 		xx = setScrollX(dx + touchX);
 		if (xx < -ww * 1.05)
 			setPic(2, ipic + 1);
-		else if (xx > -ww * 0.95)
+		else if (xx > -ww * .95)
 			setPic(0, ipic - 1);
 	} else if (phase == 'start') {
 		touchX = scrollX || 0;
@@ -682,20 +657,20 @@ function doTouch(phase, sx, dx) {
 	} else if (phase == 'end') {
 		if (scrollX < -ww * 1.2)
 			picNext();
-		else if (scrollX > -ww * 0.8)
+		else if (scrollX > -ww * .8)
 			picPrev();
 		else
 			gotoPic(0);
 		forceMenu(false);
 	} else if (phase == 'abort') {
-		doClick(sx < ww * 0.2 ? picPrev : picNext);
+		doClick(sx < ww * .2 ? picPrev : picNext);
 		forceMenu(false);
 	}
 }
 
 function isFullScr() {
 	var doc = document;
-	return (doc.fullscreenElement || doc.mozFullScreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement);
+	return doc.fullscreenElement || doc.mozFullScreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement;
 }
 
 function winResize() {
@@ -751,8 +726,7 @@ function addTouch() {
 
 	function moveStart(e) {
 		doPrevent(e);
-		distX = 0;
-		doTouch('start', startX, 0);
+		doTouch('start', startX, distX = 0);
 	}
 
 	function moveEnd(e) {
@@ -801,10 +775,9 @@ this.setGallery = function(p, path) {
 	pics = p;
 	npics = p.length;
 	ipic = 0;
-	if (dIndex) {
+	if (dIndex)
 		dMain.removeChild(dIndex);
-		dIndex = null;
-	}
+	dIndex = null;
 	gotoPic(0);
 	setBtns();
 	winResize();
@@ -850,29 +823,25 @@ function menuDown() {
 
 function menuBtns() {
 	var doc = document;
-	btnStop = addBtn('Stop', 'rglt', goSlideShow, 'R0lGODlhCgAKAIAAAP///wAA/yH5BAEKAAEALAAAAAAKAAoAAAIIhI+py+0PYysAOw==');
-	btnPlay = addBtn('Play', 'rglt', slidePlayPause, 'R0lGODlhCQAJAIAAAP///wAA/yH5BAEKAAEALAAAAAAJAAkAAAIPBIIZZrrcEIRvWmoTVdEVADs=');
-	btnPause = addBtn('Pause', 'rglt', slidePlayPause, 'R0lGODlhCgAKAIAAAP///wAA/yH5BAEKAAEALAAAAAAKAAoAAAIRhBFxi8qWHnQvSlspw1svXgAAOw==');
-	btnFirst = addBtn('First', 'rglt', picFirst, 'R0lGODlhDwALAIABAP///wAAACH5BAEKAAEALAAAAAAPAAsAAAIeBIJ4qcb+zAoyVnqxPJv3D26aEzbQeGZoxIztlAAFADs=');
-	btnPrev = addBtn('Previous', 'rglt', picPrev, 'R0lGODlhDgALAIABAP///wAAACH5BAEKAAEALAAAAAAOAAsAAAIdjA+HGpDqYESzuWfjvXn7r3ldtVFVJmHGaTGNCxQAOw==');
-	btnNext = addBtn('Next', 'rglt', picNext, 'R0lGODlhDgALAIABAP///wAAACH5BAEKAAEALAAAAAAOAAsAAAIdRI6GB5rO2mqQOvuwlbt7vgVYJJFTGS0iJKqtWgAAOw==');
-	btnLast = addBtn('Last', 'rglt', picLast, 'R0lGODlhDwALAIABAP///wAAACH5BAEKAAEALAAAAAAPAAsAAAIdRI6GAa35mIsOTqvm1VL7X3EednAWuTSpujBtUwAAOw==');
-	if (!window.navigator.standalone && (doc.fullscreenEnabled || doc.webkitFullscreenEnabled || doc.msFullscreenEnabled || doc.mozFullScreenEnabled)) {
-		addBtn('Full Screen', 'rgrt', goFull, 'R0lGODlhDgAOAIABAP///wAAACH5BAEKAAEALAAAAAAOAA4AAAIghBGpx+rBzoNNLgMvovvFPjWTBnrRaFmZynGYeaJfeBQAOw==');
-	}
-	btnIndex= addBtn('Index', 'rgrt', goIndex, 'R0lGODlhDQANAIAAAP///wAA/yH5BAEKAAEALAAAAAANAA0AAAIchBMGqMqX2orToYuzzrbLV30UuJUmOVJe2KBKAQA7');
-	btnSlide = addBtn('Slide Show', 'rgrt', goSlideShow, 'R0lGODlhDwAPAIAAAP///wAA/yH5BAEKAAEALAAAAAAPAA8AAAIrjAOpC4cOG2LsWWgapS/ho02ZBHaS4oTetHYiu6onmsEj6VrtXX8XvHEUAAA7');
-	if (dOuter.className == 'ragallery') {
-		btnBack = addBtn('Go Back', 'rgrt', goBack, 'R0lGODlhDAAOAIAAAP///////yH5BAEKAAEALAAAAAAMAA4AAAIYBBKme8mGopxUQvdubrVXvTWbR07giDEFADs=');
-	}
-	dProgress.appendChild(ndiv());
-	showBtn(dProgress, false);
+	btnStop = addBtn('Stop', 'left', goSlideShow, 'R0lGODlhCgAKAIAAAP///wAA/yH5BAEKAAEALAAAAAAKAAoAAAIIhI+py+0PYysAOw==');
+	btnPlay = addBtn('Play', 'left', slidePlayPause, 'R0lGODlhCQAJAIAAAP///wAA/yH5BAEKAAEALAAAAAAJAAkAAAIPBIIZZrrcEIRvWmoTVdEVADs=');
+	btnPause = addBtn('Pause', 'left', slidePlayPause, 'R0lGODlhCgAKAIAAAP///wAA/yH5BAEKAAEALAAAAAAKAAoAAAIRhBFxi8qWHnQvSlspw1svXgAAOw==');
+	btnFirst = addBtn('First', 'left', picFirst, 'R0lGODlhDwALAIABAP///wAAACH5BAEKAAEALAAAAAAPAAsAAAIeBIJ4qcb+zAoyVnqxPJv3D26aEzbQeGZoxIztlAAFADs=');
+	btnPrev = addBtn('Previous', 'left', picPrev, 'R0lGODlhDgALAIABAP///wAAACH5BAEKAAEALAAAAAAOAAsAAAIdjA+HGpDqYESzuWfjvXn7r3ldtVFVJmHGaTGNCxQAOw==');
+	btnNext = addBtn('Next', 'left', picNext, 'R0lGODlhDgALAIABAP///wAAACH5BAEKAAEALAAAAAAOAAsAAAIdRI6GB5rO2mqQOvuwlbt7vgVYJJFTGS0iJKqtWgAAOw==');
+	btnLast = addBtn('Last', 'left', picLast, 'R0lGODlhDwALAIABAP///wAAACH5BAEKAAEALAAAAAAPAAsAAAIdRI6GAa35mIsOTqvm1VL7X3EednAWuTSpujBtUwAAOw==');
+	if (!window.navigator.standalone && (doc.fullscreenEnabled || doc.webkitFullscreenEnabled || doc.msFullscreenEnabled || doc.mozFullScreenEnabled))
+		addBtn('Full Screen', 'right', goFull, 'R0lGODlhDgAOAIABAP///wAAACH5BAEKAAEALAAAAAAOAA4AAAIghBGpx+rBzoNNLgMvovvFPjWTBnrRaFmZynGYeaJfeBQAOw==');
+	btnIndex= addBtn('Index', 'right', goIndex, 'R0lGODlhDQANAIAAAP///wAA/yH5BAEKAAEALAAAAAANAA0AAAIchBMGqMqX2orToYuzzrbLV30UuJUmOVJe2KBKAQA7');
+	btnSlide = addBtn('Slide Show', 'right', goSlideShow, 'R0lGODlhDwAQAIABAP///wAAACH5BAEKAAEALAAAAAAPABAAAAIohI8JEcvfmJHwuVQlovneHDVbNzqVpyneAWLhqXGwyJK1CaFvnqpKAQA7');
+	if (dOuter.className == 'ragallery')
+		btnBack = addBtn('Go Back', 'right', goBack, 'R0lGODlhDAAOAIAAAP///////yH5BAEKAAEALAAAAAAMAA4AAAIYBBKme8mGopxUQvdubrVXvTWbR07giDEFADs=');
 	dMenu.appendChild(dNumber);
-	dMenu.appendChild(dProgress);
-	dVidbar.appendChild(ndiv('rgvbar1'));
-	dVidbar.appendChild(ndiv('rgvbar0'));
-	hide(dMenu.appendChild(dVidbar));
-	hide(dMenu.appendChild(dVidtime));
+	dVmeter.appendChild(ndiv('rgvmtr1'));
+	dVmeter.appendChild(ndiv('rgvmtr0'));
+	dVbar.appendChild(dVtime);
+	dVbar.appendChild(dVmeter);
+	hide(dMenu.appendChild(dVbar));
 }
 
 function main() {
@@ -885,8 +854,7 @@ function main() {
 	dMain.appendChild(dScroll);
 	dMain.appendChild(dBottom).appendChild(dMenu);
 	dControl.innerHTML = '<div><div class="rgpause0"></div><div class="rgpause1"></div></div><div class="rgplay"></div><div class="rgstop"></div>'
-	hide(dControl);
-	dMain.appendChild(dControl);
+	hide(dMain.appendChild(dControl));
 	setBtns();
 	addListener(window, 'resize', winResize);
 	addListener(window, 'orientationchange', winResize);
@@ -896,7 +864,7 @@ function main() {
 	addTouch();
 	dOuter.appendChild(dMain);
 	setPic(1, ipic);
-	winResize();
+	scroll2view();
 	dMain.focus();
 }
 main();
