@@ -4,7 +4,7 @@
 */
 function ringAlbum(dOuter, albumJson) {
 var	dMain = ndiv('ramain'),
-	dGallery = ndiv('ragall'),
+	dGallery = ndiv('ragallery'),
 	aMenus = [],
 	TRANSITION_MS = 500,
 	oGallery = null,
@@ -40,7 +40,7 @@ function initCss() {
 		cssfx('transition:all ' + TRANSITION_MS + 'ms ease-in-out;') +
 		'left:0;top:0;width:100%;height:100%');
 
-	add('.ragall',
+	add('.ragallery',
 		'position:absolute;' +
 		cssfx('transition:all 500ms ease-in-out;') +
 		'left:0;top:100%;' +
