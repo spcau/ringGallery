@@ -136,8 +136,6 @@ function initCss() {
 		'border:1px outset #484848;' + s);
 
 	add('.rgbtn:hover', 'background-color:#404040');
-	add('.rgleft', 'float:left');
-	add('.rgright', 'float:right');
 
 	add('.rgctrl',
 		absinline +
@@ -497,9 +495,10 @@ function addListener(e, n, fn) {
 }
 
 function addBtn(tip, flt, fn, gif) {
-	var btn = ndiv('rgbtn ' + flt);
+	var btn = ndiv('rgbtn');
 	btn.style.backgroundImage = 'url(data:image/gif;base64,' + gif + ')';
 	btn.title = tip;
+	btn.style.cssFloat = flt;
 	btn.onclick = fn;
 	return dMenu.appendChild(btn);
 }
@@ -826,19 +825,19 @@ function menuDown() {
 
 function menuBtns() {
 	var doc = document;
-	btnStop = addBtn('Stop', 'rgleft', goSlideShow, 'R0lGODlhCgAKAIAAAP///wAA/yH5BAEKAAEALAAAAAAKAAoAAAIIhI+py+0PYysAOw==');
-	btnPlay = addBtn('Play', 'rgleft', slidePlayPause, 'R0lGODlhCQAJAIAAAP///wAA/yH5BAEKAAEALAAAAAAJAAkAAAIPBIIZZrrcEIRvWmoTVdEVADs=');
-	btnPause = addBtn('Pause', 'rgleft', slidePlayPause, 'R0lGODlhCgAKAIAAAP///wAA/yH5BAEKAAEALAAAAAAKAAoAAAIRhBFxi8qWHnQvSlspw1svXgAAOw==');
-	btnFirst = addBtn('First', 'rgleft', picFirst, 'R0lGODlhDwALAIABAP///wAAACH5BAEKAAEALAAAAAAPAAsAAAIeBIJ4qcb+zAoyVnqxPJv3D26aEzbQeGZoxIztlAAFADs=');
-	btnPrev = addBtn('Previous', 'rgleft', picPrev, 'R0lGODlhDgALAIABAP///wAAACH5BAEKAAEALAAAAAAOAAsAAAIdjA+HGpDqYESzuWfjvXn7r3ldtVFVJmHGaTGNCxQAOw==');
-	btnNext = addBtn('Next', 'rgleft', picNext, 'R0lGODlhDgALAIABAP///wAAACH5BAEKAAEALAAAAAAOAAsAAAIdRI6GB5rO2mqQOvuwlbt7vgVYJJFTGS0iJKqtWgAAOw==');
-	btnLast = addBtn('Last', 'rgleft', picLast, 'R0lGODlhDwALAIABAP///wAAACH5BAEKAAEALAAAAAAPAAsAAAIdRI6GAa35mIsOTqvm1VL7X3EednAWuTSpujBtUwAAOw==');
+	btnStop = addBtn('Stop', 'left', goSlideShow, 'R0lGODlhCgAKAIAAAP///wAA/yH5BAEKAAEALAAAAAAKAAoAAAIIhI+py+0PYysAOw==');
+	btnPlay = addBtn('Play', 'left', slidePlayPause, 'R0lGODlhCQAJAIAAAP///wAA/yH5BAEKAAEALAAAAAAJAAkAAAIPBIIZZrrcEIRvWmoTVdEVADs=');
+	btnPause = addBtn('Pause', 'left', slidePlayPause, 'R0lGODlhCgAKAIAAAP///wAA/yH5BAEKAAEALAAAAAAKAAoAAAIRhBFxi8qWHnQvSlspw1svXgAAOw==');
+	btnFirst = addBtn('First', 'left', picFirst, 'R0lGODlhDwALAIABAP///wAAACH5BAEKAAEALAAAAAAPAAsAAAIeBIJ4qcb+zAoyVnqxPJv3D26aEzbQeGZoxIztlAAFADs=');
+	btnPrev = addBtn('Previous', 'left', picPrev, 'R0lGODlhDgALAIABAP///wAAACH5BAEKAAEALAAAAAAOAAsAAAIdjA+HGpDqYESzuWfjvXn7r3ldtVFVJmHGaTGNCxQAOw==');
+	btnNext = addBtn('Next', 'left', picNext, 'R0lGODlhDgALAIABAP///wAAACH5BAEKAAEALAAAAAAOAAsAAAIdRI6GB5rO2mqQOvuwlbt7vgVYJJFTGS0iJKqtWgAAOw==');
+	btnLast = addBtn('Last', 'left', picLast, 'R0lGODlhDwALAIABAP///wAAACH5BAEKAAEALAAAAAAPAAsAAAIdRI6GAa35mIsOTqvm1VL7X3EednAWuTSpujBtUwAAOw==');
 	if (!window.navigator.standalone && (doc.fullscreenEnabled || doc.webkitFullscreenEnabled || doc.msFullscreenEnabled || doc.mozFullScreenEnabled))
-		addBtn('Full Screen', 'rgright', goFull, 'R0lGODlhDgAOAIABAP///wAAACH5BAEKAAEALAAAAAAOAA4AAAIghBGpx+rBzoNNLgMvovvFPjWTBnrRaFmZynGYeaJfeBQAOw==');
-	btnIndex= addBtn('Index', 'rgright', goIndex, 'R0lGODlhDQANAIAAAP///wAA/yH5BAEKAAEALAAAAAANAA0AAAIchBMGqMqX2orToYuzzrbLV30UuJUmOVJe2KBKAQA7');
-	btnSlide = addBtn('Slide Show', 'rgright', goSlideShow, 'R0lGODlhDwAQAIABAP///wAAACH5BAEKAAEALAAAAAAPABAAAAIohI8JEcvfmJHwuVQlovneHDVbNzqVpyneAWLhqXGwyJK1CaFvnqpKAQA7');
+		addBtn('Full Screen', 'right', goFull, 'R0lGODlhDgAOAIABAP///wAAACH5BAEKAAEALAAAAAAOAA4AAAIghBGpx+rBzoNNLgMvovvFPjWTBnrRaFmZynGYeaJfeBQAOw==');
+	btnIndex= addBtn('Index', 'right', goIndex, 'R0lGODlhDQANAIAAAP///wAA/yH5BAEKAAEALAAAAAANAA0AAAIchBMGqMqX2orToYuzzrbLV30UuJUmOVJe2KBKAQA7');
+	btnSlide = addBtn('Slide Show', 'right', goSlideShow, 'R0lGODlhDwAQAIABAP///wAAACH5BAEKAAEALAAAAAAPABAAAAIohI8JEcvfmJHwuVQlovneHDVbNzqVpyneAWLhqXGwyJK1CaFvnqpKAQA7');
 	if (dOuter.className == 'ragallery')
-		btnBack = addBtn('Go Back', 'rgright', goBack, 'R0lGODlhDAAOAIAAAP///////yH5BAEKAAEALAAAAAAMAA4AAAIYBBKme8mGopxUQvdubrVXvTWbR07giDEFADs=');
+		btnBack = addBtn('Go Back', 'right', goBack, 'R0lGODlhDAAOAIAAAP///////yH5BAEKAAEALAAAAAAMAA4AAAIYBBKme8mGopxUQvdubrVXvTWbR07giDEFADs=');
 	dMenu.appendChild(dNumber);
 	dVmeter.appendChild(ndiv('rgvmtr1'));
 	dVmeter.appendChild(ndiv('rgvmtr0'));
