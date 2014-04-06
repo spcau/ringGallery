@@ -5,7 +5,6 @@
 function ringGallery(dOuter, pics, urlPath) {
 var	dMain = ndiv('rgmain'),
 	dScroll = ndiv('rgscroll'),
-	dBottom = ndiv('rgbottom'),
 	dMenu = ndiv('rgmenu'),
 	dControl = ndiv('rgctrl'),
 	dVbar = ndiv('rgvbar'),
@@ -63,9 +62,7 @@ function initCss() {
 		'width:100%;height:100%;' +
 		cssfx('user-select:none;'));
 
-	add('.rgbottom',
-		absinline +
-		'width:100%;bottom:0;height:' + MBAR);
+	add('.rgbottom', absinline + 'width:100%;bottom:0;height:' + MBAR);
 
 	add('.rgmenu',
 		absinline +
@@ -136,6 +133,19 @@ function initCss() {
 		'border:1px outset #484848;' + s);
 
 	add('.rgbtn:hover', 'background-color:#404040');
+
+	add('.rgbbtn',
+		absinline +
+		'pointer-events:none;' +
+		'top:50%;width:3em;;height:4em;' +
+		'background-color:rgba(128,128,128,.5);' +
+		'box-shadow:2px 2px 4px 0 #101010;' +
+		'margin:-2em 0;' +
+		cssfx('border-radius:1em;'));
+
+	s = absinline + 'width:0;height:0;top:1.2em;border:.8em solid transparent;';
+	add('.rgarrowprev', s + 'left:.2em;border-right-color:#ffffff');
+	add('.rgarrownext', s + 'right:.2em;border-left-color:#ffffff');
 
 	add('.rgctrl',
 		absinline +
@@ -211,7 +221,7 @@ function initCss() {
 			'top:50%;left:10%;right:10%;' +
 			'text-align:center;' +
 			'margin:auto;' +
-			'font-size:3em;' +
+			'font-size:2em;' +
 			'font-weight:bold;' +
 			'padding:.5em;' +
 			cssBgGrd(60,.7,40,.7));
@@ -550,8 +560,6 @@ function setBtns() {
 	showBtn(btnPlay, slideShow && ssPause);
 	showBtn(btnPause, slideShow && !ssPause);
 	showBtn(btnFirst, n);
-	showBtn(btnPrev, n);
-	showBtn(btnNext, n);
 	showBtn(btnLast, n);
 	showBtn(btnIndex, n);
 }
@@ -787,58 +795,77 @@ this.setGallery = function(p, path) {
 
 function forceMenu(up) {
 	menuAlways = up;
-	up ?  menuUp() : menuDown();
+	if (up && menuHideTimeout != 0) {
+		clearTimeout(menuHideTimeout);
+		menuHideTimeout = 0;
+	}
+	up ?  menuOn() : menuOff();
 }
 
 function mouseBottom(enter) {
 	inBottom = enter;
 	if (enter) {
-		if (menuHideTimeout != 0)
+		if (menuHideTimeout != 0) {
 			clearTimeout(menuHideTimeout);
-		menuUp();
+			menuHideTimeout = 0;
+		}
+		menuOn();
 	} else {
-		menuDown();
+		menuOff();
 	}
 }
 
-function menuUp() {
+function menuOn() {
 	dMenu.style.top = '0';
+	unHide(btnPrev);
+	unHide(btnNext);
 }
 
 function menuPeek() {
 	if (!inBottom) {
-		menuUp();
-		menuDown();
+		menuOn();
+		menuOff();
 	}
 }
 
-function menuDown() {
+function menuOff() {
 	if (menuAlways)
 		return;
 	if (menuHideTimeout != 0)
 		clearTimeout(menuHideTimeout);
 	menuHideTimeout = setTimeout(function() {
 		dMenu.style.top = '100%';
+		hide(btnPrev);
+		hide(btnNext);
 		menuHideTimeout = 0;
 	}, 2500);
 }
 
+function navBtn(left)
+{
+	var btn = ndiv('rgbbtn');
+	left ? btn.style.left = '1em' : btn.style.right = '1em';
+	btn.appendChild(ndiv(left ? 'rgarrowprev' : 'rgarrownext'));
+	hide(btn);
+	return dMain.appendChild(btn);
+}
+
 function menuBtns() {
 	var doc = document;
+	btnIndex= addBtn('Index', 'left', goIndex, 'R0lGODlhDQANAIAAAP///wAA/yH5BAEKAAEALAAAAAANAA0AAAIchBMGqMqX2orToYuzzrbLV30UuJUmOVJe2KBKAQA7');
 	btnStop = addBtn('Stop', 'left', goSlideShow, 'R0lGODlhCgAKAIAAAP///wAA/yH5BAEKAAEALAAAAAAKAAoAAAIIhI+py+0PYysAOw==');
 	btnPlay = addBtn('Play', 'left', slidePlayPause, 'R0lGODlhCQAJAIAAAP///wAA/yH5BAEKAAEALAAAAAAJAAkAAAIPBIIZZrrcEIRvWmoTVdEVADs=');
 	btnPause = addBtn('Pause', 'left', slidePlayPause, 'R0lGODlhCgAKAIAAAP///wAA/yH5BAEKAAEALAAAAAAKAAoAAAIRhBFxi8qWHnQvSlspw1svXgAAOw==');
 	btnFirst = addBtn('First', 'left', picFirst, 'R0lGODlhDwALAIABAP///wAAACH5BAEKAAEALAAAAAAPAAsAAAIeBIJ4qcb+zAoyVnqxPJv3D26aEzbQeGZoxIztlAAFADs=');
-	btnPrev = addBtn('Previous', 'left', picPrev, 'R0lGODlhDgALAIABAP///wAAACH5BAEKAAEALAAAAAAOAAsAAAIdjA+HGpDqYESzuWfjvXn7r3ldtVFVJmHGaTGNCxQAOw==');
-	btnNext = addBtn('Next', 'left', picNext, 'R0lGODlhDgALAIABAP///wAAACH5BAEKAAEALAAAAAAOAAsAAAIdRI6GB5rO2mqQOvuwlbt7vgVYJJFTGS0iJKqtWgAAOw==');
 	btnLast = addBtn('Last', 'left', picLast, 'R0lGODlhDwALAIABAP///wAAACH5BAEKAAEALAAAAAAPAAsAAAIdRI6GAa35mIsOTqvm1VL7X3EednAWuTSpujBtUwAAOw==');
 	if (!window.navigator.standalone && (doc.fullscreenEnabled || doc.webkitFullscreenEnabled || doc.msFullscreenEnabled || doc.mozFullScreenEnabled))
 		addBtn('Full Screen', 'right', goFull, 'R0lGODlhDgAOAIABAP///wAAACH5BAEKAAEALAAAAAAOAA4AAAIghBGpx+rBzoNNLgMvovvFPjWTBnrRaFmZynGYeaJfeBQAOw==');
-	btnIndex= addBtn('Index', 'right', goIndex, 'R0lGODlhDQANAIAAAP///wAA/yH5BAEKAAEALAAAAAANAA0AAAIchBMGqMqX2orToYuzzrbLV30UuJUmOVJe2KBKAQA7');
 	btnSlide = addBtn('Slide Show', 'right', goSlideShow, 'R0lGODlhDwAQAIABAP///wAAACH5BAEKAAEALAAAAAAPABAAAAIohI8JEcvfmJHwuVQlovneHDVbNzqVpyneAWLhqXGwyJK1CaFvnqpKAQA7');
 	if (dOuter.className == 'ragallery')
 		btnBack = addBtn('Go Back', 'right', goBack, 'R0lGODlhDAAOAIAAAP///////yH5BAEKAAEALAAAAAAMAA4AAAIYBBKme8mGopxUQvdubrVXvTWbR07giDEFADs=');
 	dMenu.appendChild(dNumber);
+	btnPrev = navBtn(true);
+	btnNext = navBtn(false);
 	dVmeter.appendChild(ndiv('rgvmtr1'));
 	dVmeter.appendChild(ndiv('rgvmtr0'));
 	dVbar.appendChild(dVtime);
@@ -847,21 +874,22 @@ function menuBtns() {
 }
 
 function main() {
+	var d0 = ndiv('rgbottom');
 	urlPath = urlPath || '';
 	initCss();
 	addBox(); addBox(); addBox();
-	menuBtns();
 	dMain.tabIndex = "1"
 	dMain.onkeydown = keyDown;
 	dMain.appendChild(dScroll);
-	dMain.appendChild(dBottom).appendChild(dMenu);
+	dMain.appendChild(d0).appendChild(dMenu);
+	menuBtns();
 	dControl.innerHTML = '<div><div class="rgpause0"></div><div class="rgpause1"></div></div><div class="rgplay"></div><div class="rgstop"></div>'
 	hide(dMain.appendChild(dControl));
 	setBtns();
 	addListener(window, 'resize', winResize);
 	addListener(window, 'orientationchange', winResize);
-	dBottom.onmouseenter = function(){mouseBottom(true);};
-	dBottom.onmouseleave = function(){mouseBottom(false);};
+	d0.onmouseenter = function(){mouseBottom(true);};
+	d0.onmouseleave = function(){mouseBottom(false);};
 	cssTrn(dMenu, 'all 250ms linear');
 	addTouch();
 	dOuter.appendChild(dMain);
