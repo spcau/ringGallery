@@ -107,12 +107,12 @@ function initCss() {
 
 	add('.rgvmtr',
 		absinline +
-		'background-color:rgba(48,48,48,.3);' +
+		cssBgGrd(48,.3,48,.3) +
 		'width:100%;height:6px;bottom:0');
 
 	s = absinline + 'left:0;height:5px;';
 	add('.rgvmtr0', s + cssBgGrd(255,1,220,1));
-	add('.rgvmtr1', s + 'background:rgba(255,255,255,.2)');
+	add('.rgvmtr1', s + cssBgGrd(255,.2,220,.2));
 
 	add('.rgvtime',
 		absinline +
@@ -130,7 +130,7 @@ function initCss() {
 		absinline +
 		'pointer-events:none;' +
 		'top:50%;width:3em;;height:4em;' +
-		'background-color:rgba(128,128,128,.5);' +
+		cssBgGrd(128,.5,128,.5) +
 		'box-shadow:2px 2px 4px 0 #101010;' +
 		'margin:-2em 0;' +
 		cssfx('border-radius:1em;'));
@@ -222,14 +222,12 @@ function initCss() {
 }
 
 function c2h(c,a) {
-	var h = (a*255)<<24|c<<16|c<<8|c;
-	return (h < 0 ? 0xFFFFFFFF + h + 1 : h).toString(16);
+	return (((a*255)<<24|c<<16|c<<8|c)>>>0).toString(16);
 }
 
 function cssBgGrd(c0,a0,c1,a1) {
-	var h0 = c2h(c0,a0), h1 = c2h(c1,a1);
 	return 'background:none;' + cssfx2('background:','linear-gradient(top,rgba('+c0+','+c0+','+c0+','+a0+'),rgba('+c1+','+c1+','+c1+','+a1+'));') +
-		"filter:progid:DXImageTransform.Microsoft.gradient(startColorStr='#" + h0 + "',endColorStr='#" + h1 + "');";
+		"filter:progid:DXImageTransform.Microsoft.gradient(startColorStr='#" + c2h(c0,a0) + "',endColorStr='#" + c2h(c1,a1) + "');";
 }
 
 function nEl(n, c) {
@@ -243,7 +241,7 @@ function ndiv(c) {
 }
 
 function cssfx(s) {
-	return s + '-webkit-' + s + '-moz-' + s + '-ms-' + s;
+	return cssfx2('', s);
 }
 
 function cssfx2(p, s) {
@@ -256,7 +254,7 @@ function addBox() {
 		vidbox = ndiv('rgimgbox'),
 		wait = ndiv('rgwait'),
 		img = new Image(),
-		vid = nEl('video', 'rgvideo')
+		vid = nEl('video', 'rgvideo');
 
 	dScroll.appendChild(box);
 	hide(box.appendChild(imgbox));
