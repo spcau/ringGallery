@@ -67,7 +67,7 @@ function initCss() {
 		absinline +
 		'text-align:center;' +
 		'vertical-align:middle;' +
-		cssBgGrd(48,.7,16,.7) +
+		cssBg(48,16,.7) +
 		'line-height:' + MBAR + ';' +
 		'width:100%;top:100%;height:' + MBAR);
 
@@ -107,16 +107,16 @@ function initCss() {
 
 	add('.rgvmtr',
 		absinline +
-		cssBgGrd(48,.3,48,.3) +
+		cssBg(48,48,.3) +
 		'width:100%;height:6px;bottom:0');
 
 	s = absinline + 'left:0;height:5px;';
-	add('.rgvmtr0', s + cssBgGrd(255,1,220,1));
-	add('.rgvmtr1', s + cssBgGrd(255,.2,220,.2));
+	add('.rgvmtr0', s + cssBg(255,220,1));
+	add('.rgvmtr1', s + cssBg(255,220,.2));
 
 	add('.rgvtime',
 		absinline +
-		cssBgGrd(32,.7,32,.7) +
+		cssBg(32,32,.7) +
 		'padding:3px;' +
 		'font-size:.9em;' +
 		'line-height:1em;' +
@@ -129,10 +129,10 @@ function initCss() {
 	add('.rgbbtn',
 		absinline +
 		'pointer-events:none;' +
-		'top:50%;width:3em;;height:4em;' +
-		cssBgGrd(128,.5,128,.5) +
-		'box-shadow:2px 2px 4px 0 #101010;' +
+		'top:50%;width:3em;height:4em;' +
 		'margin:-2em 0;' +
+		'box-shadow:2px 2px 4px 0 #101010;' +
+		cssBg(128,128,.5) +
 		cssfx('border-radius:1em;'));
 
 	s = absinline + 'width:0;height:0;top:1.2em;border:.8em solid transparent;';
@@ -143,26 +143,23 @@ function initCss() {
 		absinline +
 		'pointer-events:none;' +
 		'top:50%;left:50%;width:10em;height:10em;' +
-		cssBgGrd(130,.9,99,.9) +
+		cssBg(130,99,.9) +
 		'box-shadow:8px 8px 16px 0 #202020;' +
 		'margin:-5em;' +
 		cssfx('border-radius:2em;'));
 
 	s = absinline + 'background:#ffffff;';
 	add('.rgstop', s + 'top:30%;left:30%;right:30%;bottom:30%');
-	s += 'top:25%;width:13%;bottom:25%;';
-	add('.rgpause0', s + 'left:32%');
-	add('.rgpause1', s + 'right:32%');
+	add('.rgpause', s + 'top:25%;width:13%;bottom:25%;');
 	add('.rgplay', absinline +
 		'width:0;height:0;top:20%;left:32%;' +
-		'border-top:3em solid transparent;' +
-		'border-bottom:3em solid transparent;' +
-		'border-left:4.8em solid #ffffff');
+		'border:3em solid transparent;' +
+		'border-left:4.8em #ffffff');
 
 	add('.rgidx',
 		absinline +
 		'width:100%;height:100%;' +
-		cssBgGrd(0,.7,0,.7));
+		cssBg(0,0,.7));
 
 	add('.rgidx>div',
 		absinline +
@@ -216,7 +213,7 @@ function initCss() {
 			'font-size:2em;' +
 			'font-weight:bold;' +
 			'padding:.5em;' +
-			cssBgGrd(60,.7,40,.7));
+			cssBg(60,40,.7));
 		htmlWait = 'Loading...';
 	}
 }
@@ -225,9 +222,9 @@ function c2h(c,a) {
 	return (((a*255)<<24|c<<16|c<<8|c)>>>0).toString(16);
 }
 
-function cssBgGrd(c0,a0,c1,a1) {
-	return 'background:none;' + cssfx2('background:','linear-gradient(top,rgba('+c0+','+c0+','+c0+','+a0+'),rgba('+c1+','+c1+','+c1+','+a1+'));') +
-		"filter:progid:DXImageTransform.Microsoft.gradient(startColorStr='#" + c2h(c0,a0) + "',endColorStr='#" + c2h(c1,a1) + "');";
+function cssBg(c0,c1,a) {
+	return 'background:none;' + cssfx2('background:','linear-gradient(top,rgba('+c0+','+c0+','+c0+','+a+'),rgba('+c1+','+c1+','+c1+','+a+'));') +
+		"filter:progid:DXImageTransform.Microsoft.gradient(startColorStr='#" + c2h(c0,a) + "',endColorStr='#" + c2h(c1,a) + "');";
 }
 
 function nEl(n, c) {
@@ -868,7 +865,7 @@ function main() {
 	dMain.appendChild(dScroll);
 	dMain.appendChild(d0).appendChild(dMenu);
 	menuBtns();
-	dControl.innerHTML = '<div><div class="rgpause0"></div><div class="rgpause1"></div></div><div class="rgplay"></div><div class="rgstop"></div>'
+	dControl.innerHTML = '<div><div class="rgpause" style="left:32%"></div><div class="rgpause" style="right:32%"></div></div><div class="rgplay"></div><div class="rgstop"></div>'
 	hide(dMain.appendChild(dControl));
 	setBtns();
 	addListener(window, 'resize', winResize);
