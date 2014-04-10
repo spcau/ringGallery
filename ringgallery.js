@@ -154,7 +154,7 @@ function initCss() {
 	add('.rgplay', absinline +
 		'width:0;height:0;top:20%;left:32%;' +
 		'border:3em solid transparent;' +
-		'border-left:4.8em #ffffff');
+		'border-left:4.8em solid #ffffff');
 
 	add('.rgidx',
 		absinline +
