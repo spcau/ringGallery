@@ -3,6 +3,7 @@
 ** http://github.com/spcau/ringGallery
 */
 function ringGallery(dOuter, pics, urlPath) {
+'use strict';
 var	dMain = ndiv('rgmain'),
 	dScroll = ndiv('rgscroll'),
 	dMenu = ndiv('rgmenu'),
@@ -12,7 +13,7 @@ var	dMain = ndiv('rgmain'),
 	dVtime = ndiv('rgvtime'),
 	dNumber = ndiv('rgnum'),
 	dIndex = null,
-	btnSlide, btnStop, btnFirst, btnPrev, btnNext, btnLast, btnIndex, btnPlay, btnPause, btnBack,
+	btnSlide, btnStop, btnFirst, btnPrev, btnNext, btnLast, btnIndex, btnPlay, btnPause,
 	npics = pics.length,
 	ipic = 0,
 	slideShow = false,
@@ -22,8 +23,25 @@ var	dMain = ndiv('rgmain'),
 	ssLastPic = 0, ssInterval = 0, ssNextTime = 0, ssPause = false,
 	SS_DELAY = 3000, TIMER_MOVE_MS = 150, TIMER_SLIDESHOW_MS = 900,
 	scrollX = 0, touchX,
-	htmlWait;
+	htmlWait,
 	menuAlways = false, inBottom = false, menuHideTimeout = 0;
+
+function cssfx(s) {
+	return cssfx2('', s);
+}
+
+function cssfx2(p, s) {
+	return p + s + p + '-webkit-' + s + p + '-moz-' + s + p + '-ms-' + s;
+}
+
+function c2h(c,a) {
+	return (((a*255)<<24|c<<16|c<<8|c)>>>0).toString(16);
+}
+
+function cssBg(c0,c1,a) {
+	return 'background:none;' + cssfx2('background:','linear-gradient(top,rgba('+c0+','+c0+','+c0+','+a+'),rgba('+c1+','+c1+','+c1+','+a+'));') +
+		"filter:progid:DXImageTransform.Microsoft.gradient(startColorStr='#" + c2h(c0,a) + "',endColorStr='#" + c2h(c1,a) + "');";
+}
 
 function initCss() {
 	var MBAR = '2.8em',
@@ -32,17 +50,19 @@ function initCss() {
 		absinline = 'position:absolute;display:inline-block;';
 
 	function prop(n1, n2) {
-		var i, s, p = ['webkit','Moz','O','ms'];
-		for (i = 0 ; i < 4; i++) {
-			if ((s = p[i] + n2) in css)
-				return s;
+		var j, n, p = ['webkit','Moz','O','ms'];
+		for (j = 0 ; j < 4; j++) {
+			n = p[j] + n2;
+			if (n in css) {
+				return n;
+			}
 		}
 		return n1 in css ? n1 : null;
 	}
 
 	function add(a,b) {
 		try {
-			(css.insertRule) ? css.insertRule(a+ '{' + b + '}',0) : css.addRule(a,b);
+			css.insertRule ? css.insertRule(a+ '{' + b + '}',0) : css.addRule(a,b);
 		} catch (err) { }
 	}
 
@@ -56,8 +76,8 @@ function initCss() {
 	add('.rgmain',
 		absinline +
 		'text-align:left;' +
-		'background:#000000;' +
-		'color:#ffffff;' +
+		'background:#000;' +
+		'color:white;' +
 		'width:100%;height:100%;' +
 		cssfx('user-select:none;'));
 
@@ -67,7 +87,7 @@ function initCss() {
 		absinline +
 		'text-align:center;' +
 		'vertical-align:middle;' +
-		cssBg(48,16,.7) +
+		cssBg(48,16,0.7) +
 		'line-height:' + MBAR + ';' +
 		'width:100%;top:100%;height:' + MBAR);
 
@@ -107,16 +127,16 @@ function initCss() {
 
 	add('.rgvmtr',
 		absinline +
-		cssBg(48,48,.3) +
+		cssBg(48,48,0.3) +
 		'width:100%;height:6px;bottom:0');
 
 	s = absinline + 'left:0;height:5px;';
 	add('.rgvmtr0', s + cssBg(255,220,1));
-	add('.rgvmtr1', s + cssBg(255,220,.2));
+	add('.rgvmtr1', s + cssBg(255,220,0.2));
 
 	add('.rgvtime',
 		absinline +
-		cssBg(32,32,.7) +
+		cssBg(32,32,0.7) +
 		'padding:3px;' +
 		'font-size:.9em;' +
 		'line-height:1em;' +
@@ -132,34 +152,34 @@ function initCss() {
 		'top:50%;width:3em;height:4em;' +
 		'margin:-2em 0;' +
 		'box-shadow:2px 2px 4px 0 #101010;' +
-		cssBg(128,128,.5) +
+		cssBg(128,128,0.5) +
 		cssfx('border-radius:1em;'));
 
 	s = absinline + 'width:0;height:0;top:1.2em;border:.8em solid transparent;';
-	add('.rgarrowleft', s + 'left:.2em;border-right-color:#ffffff');
-	add('.rgarrowright', s + 'right:.2em;border-left-color:#ffffff');
+	add('.rgarrowleft', s + 'left:.2em;border-right-color:white');
+	add('.rgarrowright', s + 'right:.2em;border-left-color:white');
 
 	add('.rgctrl',
 		absinline +
 		'pointer-events:none;' +
 		'top:50%;left:50%;width:10em;height:10em;' +
-		cssBg(130,99,.9) +
+		cssBg(130,99,0.9) +
 		'box-shadow:8px 8px 16px 0 #202020;' +
 		'margin:-5em;' +
 		cssfx('border-radius:2em;'));
 
-	s = absinline + 'background:#ffffff;';
+	s = absinline + 'background:white;';
 	add('.rgstop', s + 'top:30%;left:30%;right:30%;bottom:30%');
 	add('.rgpause', s + 'top:25%;width:13%;bottom:25%;');
 	add('.rgplay', absinline +
 		'width:0;height:0;top:20%;left:32%;' +
 		'border:3em solid transparent;' +
-		'border-left:4.8em solid #ffffff');
+		'border-left:4.8em solid white');
 
 	add('.rgidx',
 		absinline +
 		'width:100%;height:100%;' +
-		cssBg(0,0,.7));
+		cssBg(0,0,0.7));
 
 	add('.rgidx>div',
 		absinline +
@@ -189,7 +209,7 @@ function initCss() {
 			absinline +
 			'width:10%;height:28%;' +
 			'left:45%;top:36%;' +
-			'background:#ffffff;' +
+			'background:white;' +
 			cssfx('animation:waitfade 1s linear infinite;') +
 			cssfx('border-radius:4em;'));
 
@@ -198,10 +218,9 @@ function initCss() {
 		add('@-webkit-keyframes waitfade', s);
 		htmlWait = '';
 		for (i = 0; i < 10; i++) {
-			var deg = (360/10) * i, delay = (i-10)/10;
 			add('div.rgwait div.b' + i,
-				cssfx('transform:' + 'rotate(' + deg + 'deg) translate(0, -110%);') +
-				cssfx('animation-delay:' + delay + 's;'));
+				cssfx('transform:' + 'rotate(' + ((360/10) * i) + 'deg) translate(0, -110%);') +
+				cssfx('animation-delay:' + ((i-10)/10) + 's;'));
 			htmlWait += '<div class="b' + i + '"></div>';
 		}
 	} else {
@@ -213,18 +232,9 @@ function initCss() {
 			'font-size:2em;' +
 			'font-weight:bold;' +
 			'padding:.5em;' +
-			cssBg(60,40,.7));
+			cssBg(60,40,0.7));
 		htmlWait = 'Loading...';
 	}
-}
-
-function c2h(c,a) {
-	return (((a*255)<<24|c<<16|c<<8|c)>>>0).toString(16);
-}
-
-function cssBg(c0,c1,a) {
-	return 'background:none;' + cssfx2('background:','linear-gradient(top,rgba('+c0+','+c0+','+c0+','+a+'),rgba('+c1+','+c1+','+c1+','+a+'));') +
-		"filter:progid:DXImageTransform.Microsoft.gradient(startColorStr='#" + c2h(c0,a) + "',endColorStr='#" + c2h(c1,a) + "');";
 }
 
 function nEl(n, c) {
@@ -235,14 +245,6 @@ function nEl(n, c) {
 
 function ndiv(c) {
 	return nEl('div', c);
-}
-
-function cssfx(s) {
-	return cssfx2('', s);
-}
-
-function cssfx2(p, s) {
-	return p + s + p + '-webkit-' + s + p + '-moz-' + s + p + '-ms-' + s;
 }
 
 function addBox() {
@@ -260,8 +262,9 @@ function addBox() {
 	hide(imgbox.appendChild(img));
 	vidbox.appendChild(vid);
 	wait.innerHTML = htmlWait;
-	if (bgZoom)
+	if (bgZoom) {
 		img.style.maxWidth = '100%';
+	}
 	img.onload = img.onerror = imgCallback;
 	if (vid.play) {
 		hasVideo = true;
@@ -291,12 +294,11 @@ function getImg(n) {
 function imgResize(img) {
 	if (bgZoom && imgComplete(img)) {
 		var pp = img.parentNode.parentNode,
-			bw = pp.clientWidth,
-			bh = pp.clientHeight,
-			iw = img.width,
-			ih = img.height;
-		if (iw && ih && bw && bh)
+			bw = pp.clientWidth, bh = pp.clientHeight,
+			iw = img.width, ih = img.height;
+		if (iw && ih && bw && bh) {
 			img.parentNode.style.zoom = (Math.min(bw * 100 / iw, bh * 100 / ih)) + '%';
+		}
 	}
 }
 
@@ -321,8 +323,9 @@ function imgCallback() {
 	if (imgComplete(this) && !isHide(imgbox)) {
 		hide(imgbox.parentNode.lastChild);
 		imgResize(this);
-		if (this == getImg(1) && ipic < npics - 1)
+		if (this == getImg(1) && ipic < npics - 1) {
 			setPic(2, ipic + 1);
+		}
 	}
 }
 
@@ -400,10 +403,8 @@ function vidTimer() {
 }
 
 function vidBuffer() {
-	var vid = this, w = '0'
-	if (vid == getVid(1) && vid.duration && vid.buffered.end(0))
-		w = (vid.buffered.end(0) * 100 / vid.duration) + '%';
-	dVmeter.firstChild.style.width = w;
+	var vid = this;
+	dVmeter.firstChild.style.width = (vid == getVid(1) && vid.duration && vid.buffered.end(0)) ?  (vid.buffered.end(0) * 100 / vid.duration) + '%' : '0';
 }
 
 function setControls() {
@@ -412,10 +413,11 @@ function setControls() {
 		v = false,
 		i, c;
 	if (hasVideo && !isHide(vid.parentNode)) {
-		if (vid.ended)
+		if (vid.ended) {
 			type = 2;
-		else if (vid.paused)
+		} else if (vid.paused) {
 			type = vid.currentTime == 0 ? 1 : 0;
+		}
 		v  = vid.duration;
 	} else if (slideShow && ssPause) {
 		type = 0;
@@ -463,10 +465,12 @@ function gotoPic(n) {
 		setPic(2, ipic + 1);
 	}
 	setTimeout(viewPic, 50);
-	if (!slideShow)
+	if (!slideShow) {
 		menuPeek();
-	if (n == 0)
+	}
+	if (n == 0) {
 		dMain.focus();
+	}
 }
 
 function picFirst(){gotoPic(-2);}
@@ -504,13 +508,15 @@ function imgComplete(img) {
 
 function slideShowFn() {
 	var vid = getVid(1),
-		isvid = (hasVideo && !isHide(vid.parentNode));
-	if (isvid && !vid.ended)
+		isvid = (hasVideo && !isHide(vid.parentNode)),
+		now;
+	if (isvid && !vid.ended) {
 		return;
+	}
 	if (ipic == ssLastPic) {
 		stopSlide();
 	} else if (!ssPause) {
-		var now = new Date().getTime();
+		now = new Date().getTime();
 		if (now > ssNextTime) {
 			vid = getVid(2);
 			isvid = (hasVideo && !isHide(vid.parentNode));
@@ -527,8 +533,9 @@ function slideShowFn() {
 }
 
 function stopSlide() {
-	if (!slideShow)
+	if (!slideShow) {
 		return;
+	}
 	if (ssInterval != 0) {
 		clearInterval(ssInterval);
 		ssInterval = 0;
@@ -563,15 +570,18 @@ function goSlideShow() {
 	ssPause = false;
 	setPic(2, ipic + 1);
 	setBtns();
-	if (isvid)
+	if (isvid) {
 		vid.play();
+	}
 }
 
 function slidePlayPause() {
-	if (!slideShow)
+	if (!slideShow) {
 		return;
-	if (ssPause)
+	}
+	if (ssPause) {
 		ssNextTime = new Date().getTime() + SS_DELAY;
+	}
 	ssPause = !ssPause;
 	setBtns();
 	setControls();
@@ -581,36 +591,43 @@ function slidePlayPause() {
 this.stopGallery = function() {
 	stopSlide();
 	vidStop(getVid(1));
-	if (isFullScr())
+	if (isFullScr()) {
 		goFull();
+	}
 };
 
 function goFull() {
 	var doc = document;
 	if (!isFullScr()) {
-		if (dOuter.requestFullscreen)
+		if (dOuter.requestFullscreen) {
 			dOuter.requestFullscreen();
-		else if (dOuter.webkitRequestFullscreen)
+		} else if (dOuter.webkitRequestFullscreen) {
 			dOuter.webkitRequestFullscreen();
-		else if (dOuter.msRequestFullscreen)
+		} else if (dOuter.msRequestFullscreen) {
 			dOuter.msRequestFullscreen();
-		else if (dOuter.mozRequestFullScreen)
+		} else if (dOuter.mozRequestFullScreen) {
 			dOuter.mozRequestFullScreen();
+		}
 	} else {
-		if (doc.exitFullscreen)
+		if (doc.exitFullscreen) {
 			doc.exitFullscreen();
-		else if (doc.webkitExitFullscreen)
+		}
+		else if (doc.webkitExitFullscreen) {
 			doc.webkitExitFullscreen();
-		else if (doc.msExitFullscreen)
+		}
+		else if (doc.msExitFullscreen) {
 			doc.msExitFullscreen();
-		else if (doc.mozCancelFullScreen)
+		}
+		else if (doc.mozCancelFullScreen) {
 			doc.mozCancelFullScreen();
+		}
 	}
 	dMain.focus();
 }
 
-function chooseIndex(e) {
-	setPic(1, ipic = parseInt(this.id));
+function chooseIndex() {
+	ipic = parseInt(this.id);
+	setPic(1, ipic);
 	scroll2view();
 	hide(dIndex);
 }
@@ -624,9 +641,9 @@ function goIndex() {
 		unHide(dIndex);
 		return;
 	}
-	var dv = ndiv();
-	for (var i = 0; i < npics; i++) {
-		var img= new Image();
+	var dv = ndiv(), i, img;
+	for (i = 0; i < npics; i++) {
+		img = new Image();
 		img.src = urlPath + pics[i].thumb;
 		img.id = i;
 		img.onclick = chooseIndex;
@@ -637,146 +654,11 @@ function goIndex() {
 	dMain.appendChild(dIndex).appendChild(dv);
 }
 
-function doTouch(phase, sx, dx) {
-	var ww = dMain.clientWidth, xx;
-	if (phase == 'move') {
-		xx = setScrollX(dx + touchX);
-		if (xx < -ww * 1.05)
-			setPic(2, ipic + 1);
-		else if (xx > -ww * .95)
-			setPic(0, ipic - 1);
-	} else if (phase == 'start') {
-		touchX = scrollX || 0;
-		cssTrn(dScroll, '');
-		forceMenu(true);
-	} else if (phase == 'end') {
-		if (scrollX < -ww * 1.2)
-			picNext();
-		else if (scrollX > -ww * .8)
-			picPrev();
-		else
-			gotoPic(0);
-		forceMenu(false);
-	} else if (phase == 'abort') {
-		doClick(sx < ww * .2 ? picPrev : picNext);
-		forceMenu(false);
-	}
+function menuOn() {
+	dMenu.style.top = '0';
+	unHide(btnPrev);
+	unHide(btnNext);
 }
-
-function isFullScr() {
-	var doc = document;
-	return doc.fullscreenElement || doc.mozFullScreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement;
-}
-
-function winResize() {
-	for (var i = 0; i < 3; i++)
-		imgResize(getImg(i));
-	cssTrn(dScroll, '');
-	scroll2view();
-}
-
-function keyDown(e) {
-	e = e || window.event;
-	if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey)
-		return;
-	switch (e.keyCode) {
-	case 36:
-		picFirst();
-		break;
-	case 37:
-		picPrev();
-		break;
-	case 39:
-		picNext();
-		break;
-	case 35:
-		picLast();
-		break;
-	case 27:
-		if (slideShow)
-			stopSlide();
-		break;
-	case 32:
-		doClick(picNext);
-		break;
-	}
-}
-
-function addTouch() {
-	var	startX, distX,
-		inMouse = false,
-		inTouch = false;
-
-	function doPrevent(e) {
-		e.preventDefault ? e.preventDefault() : e.returnValue = false;
-		e.stopPropagation ? e.stopPropagation() : e.cancelBubble = true;
-	}
-
-	function moveIt(e, x) {
-		doPrevent(e);
-		if (Math.abs(x - distX) > 2) {
-			doTouch('move', startX, distX = x);
-		}
-	}
-
-	function moveStart(e) {
-		doPrevent(e);
-		doTouch('start', startX, distX = 0);
-	}
-
-	function moveEnd(e) {
-		doPrevent(e);
-		doTouch(Math.abs(distX) <= 0 ? 'abort' : 'end', startX, distX);
-	}
-
-	addListener(dScroll, 'touchstart', function(e) {
-		if (!inTouch && !inMouse && e.changedTouches.length == 1) {
-			inTouch = true;
-			startX = e.changedTouches[0].pageX;
-			moveStart(e);
-		}
-	});
-	addListener(dScroll, 'touchmove', function(e) {
-		if (inTouch)
-			moveIt(e, e.changedTouches[0].pageX - startX);
-	});
-	addListener(dScroll, 'touchend', function(e) {
-		if (inTouch) {
-			inTouch = false;
-			moveEnd(e);
-		}
-	});
-	addListener(dScroll, 'mousedown', function(e) {
-		if (!inTouch && !inMouse && ((e.which || e.button) == 1)) {
-			inMouse = true;
-			startX = e.pageX || e.clientX;
-			moveStart(e);
-		}
-	});
-	addListener(dScroll, 'mousemove', function(e) {
-		if (inMouse)
-			moveIt(e, (e.pageX || e.clientX) - startX);
-	});
-	addListener(dScroll, 'mouseup', function(e) {
-		if (inMouse) {
-			inMouse = false;
-			moveEnd(e);
-		}
-	});
-}
-
-this.setGallery = function(p, path) {
-	urlPath = path || '';
-	pics = p;
-	npics = p.length;
-	ipic = 0;
-	if (dIndex)
-		dMain.removeChild(dIndex);
-	dIndex = null;
-	gotoPic(0);
-	setBtns();
-	winResize();
-};
 
 function forceMenu(up) {
 	menuAlways = up;
@@ -800,12 +682,6 @@ function mouseBottom(enter) {
 	}
 }
 
-function menuOn() {
-	dMenu.style.top = '0';
-	unHide(btnPrev);
-	unHide(btnNext);
-}
-
 function menuPeek() {
 	if (!inBottom) {
 		menuOn();
@@ -813,11 +689,165 @@ function menuPeek() {
 	}
 }
 
-function menuOff() {
-	if (menuAlways)
+function doTouch(phase, sx, dx) {
+	var ww = dMain.clientWidth, xx;
+	if (phase == 'move') {
+		xx = setScrollX(dx + touchX);
+		if (xx < -ww * 1.05) {
+			setPic(2, ipic + 1);
+		} else if (xx > -ww * 0.95) {
+			setPic(0, ipic - 1);
+		}
+	} else if (phase == 'start') {
+		touchX = scrollX || 0;
+		cssTrn(dScroll, '');
+		forceMenu(true);
+	} else if (phase == 'end') {
+		if (scrollX < -ww * 1.2) {
+			picNext();
+		} else if (scrollX > -ww * 0.8) {
+			picPrev();
+		} else {
+			gotoPic(0);
+		}
+		forceMenu(false);
+	} else if (phase == 'abort') {
+		doClick(sx < ww * 0.2 ? picPrev : picNext);
+		forceMenu(false);
+	}
+}
+
+function isFullScr() {
+	var doc = document;
+	return doc.fullscreenElement || doc.mozFullScreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement;
+}
+
+function winResize() {
+	var i;
+	for (i = 0; i < 3; i++) {
+		imgResize(getImg(i));
+	}
+	cssTrn(dScroll, '');
+	scroll2view();
+}
+
+function keyDown(e) {
+	e = e || window.event;
+	if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) {
 		return;
-	if (menuHideTimeout != 0)
+	}
+	switch (e.keyCode) {
+	case 36:
+		picFirst();
+		break;
+	case 37:
+		picPrev();
+		break;
+	case 39:
+		picNext();
+		break;
+	case 35:
+		picLast();
+		break;
+	case 27:
+		if (slideShow) {
+			stopSlide();
+		}
+		break;
+	case 32:
+		doClick(picNext);
+		break;
+	}
+}
+
+function addTouch() {
+	var	startX, distX,
+		inMouse = false,
+		inTouch = false;
+
+	function doPrevent(e) {
+		e.preventDefault ? e.preventDefault() : e.returnValue = false;
+		e.stopPropagation ? e.stopPropagation() : e.cancelBubble = true;
+	}
+
+	function moveIt(e, x) {
+		doPrevent(e);
+		if (Math.abs(x - distX) > 2) {
+			distX = x;
+			doTouch('move', startX, x);
+		}
+	}
+
+	function moveStart(e) {
+		doPrevent(e);
+		distX = 0;
+		doTouch('start', startX,  0);
+	}
+
+	function moveEnd(e) {
+		doPrevent(e);
+		doTouch(Math.abs(distX) <= 0 ? 'abort' : 'end', startX, distX);
+	}
+
+	addListener(dScroll, 'touchstart', function(e) {
+		if (!inTouch && !inMouse && e.changedTouches.length == 1) {
+			inTouch = true;
+			startX = e.changedTouches[0].pageX;
+			moveStart(e);
+		}
+	});
+	addListener(dScroll, 'touchmove', function(e) {
+		if (inTouch) {
+			moveIt(e, e.changedTouches[0].pageX - startX);
+		}
+	});
+	addListener(dScroll, 'touchend', function(e) {
+		if (inTouch) {
+			inTouch = false;
+			moveEnd(e);
+		}
+	});
+	addListener(dScroll, 'mousedown', function(e) {
+		if (!inTouch && !inMouse && ((e.which || e.button) == 1)) {
+			inMouse = true;
+			startX = e.pageX || e.clientX;
+			moveStart(e);
+		}
+	});
+	addListener(dScroll, 'mousemove', function(e) {
+		if (inMouse) {
+			moveIt(e, (e.pageX || e.clientX) - startX);
+		}
+	});
+	addListener(dScroll, 'mouseup', function(e) {
+		if (inMouse) {
+			inMouse = false;
+			moveEnd(e);
+		}
+	});
+}
+
+this.setGallery = function(p, path) {
+	urlPath = path || '';
+	pics = p;
+	npics = p.length;
+	ipic = 0;
+	if (dIndex) {
+		dMain.removeChild(dIndex);
+	}
+	dIndex = null;
+	gotoPic(0);
+	setBtns();
+	winResize();
+};
+
+function menuOff() {
+	if (menuAlways) {
+		return;
+	}
+	if (menuHideTimeout != 0) {
 		clearTimeout(menuHideTimeout);
+	}
 	menuHideTimeout = setTimeout(function() {
 		dMenu.style.top = '100%';
 		hide(btnPrev);
@@ -842,11 +872,13 @@ function menuBtns() {
 	btnPause = addBtn('Pause', 'left', slidePlayPause, 'R0lGODlhCgAKAIAAAP///wAA/yH5BAEKAAEALAAAAAAKAAoAAAIRhBFxi8qWHnQvSlspw1svXgAAOw==');
 	btnFirst = addBtn('First', 'left', picFirst, 'R0lGODlhDwALAIABAP///wAAACH5BAEKAAEALAAAAAAPAAsAAAIeBIJ4qcb+zAoyVnqxPJv3D26aEzbQeGZoxIztlAAFADs=');
 	btnLast = addBtn('Last', 'left', picLast, 'R0lGODlhDwALAIABAP///wAAACH5BAEKAAEALAAAAAAPAAsAAAIdRI6GAa35mIsOTqvm1VL7X3EednAWuTSpujBtUwAAOw==');
-	if (!window.navigator.standalone && (doc.fullscreenEnabled || doc.webkitFullscreenEnabled || doc.msFullscreenEnabled || doc.mozFullScreenEnabled))
+	if (!window.navigator.standalone && (doc.fullscreenEnabled || doc.webkitFullscreenEnabled || doc.msFullscreenEnabled || doc.mozFullScreenEnabled)) {
 		addBtn('Full Screen', 'right', goFull, 'R0lGODlhDgAOAIABAP///wAAACH5BAEKAAEALAAAAAAOAA4AAAIghBGpx+rBzoNNLgMvovvFPjWTBnrRaFmZynGYeaJfeBQAOw==');
+	}
 	btnSlide = addBtn('Slide Show', 'right', goSlideShow, 'R0lGODlhDwAQAIABAP///wAAACH5BAEKAAEALAAAAAAPABAAAAIohI8JEcvfmJHwuVQlovneHDVbNzqVpyneAWLhqXGwyJK1CaFvnqpKAQA7');
-	if (dOuter.className == 'ragallery')
-		btnBack = addBtn('Go Back', 'right', goBack, 'R0lGODlhDAAOAIAAAP///////yH5BAEKAAEALAAAAAAMAA4AAAIYBBKme8mGopxUQvdubrVXvTWbR07giDEFADs=');
+	if (dOuter.className == 'ragallery') {
+		addBtn('Go Back', 'right', goBack, 'R0lGODlhDAAOAIAAAP///////yH5BAEKAAEALAAAAAAMAA4AAAIYBBKme8mGopxUQvdubrVXvTWbR07giDEFADs=');
+	}
 	dMenu.appendChild(dNumber);
 	btnPrev = navBtn('left');
 	btnNext = navBtn('right');
@@ -860,12 +892,12 @@ function main() {
 	urlPath = urlPath || '';
 	initCss();
 	addBox(); addBox(); addBox();
-	dMain.tabIndex = "1"
+	dMain.tabIndex = "1";
 	dMain.onkeydown = keyDown;
 	dMain.appendChild(dScroll);
 	dMain.appendChild(d0).appendChild(dMenu);
 	menuBtns();
-	dControl.innerHTML = '<div><div class="rgpause" style="left:32%"></div><div class="rgpause" style="right:32%"></div></div><div class="rgplay"></div><div class="rgstop"></div>'
+	dControl.innerHTML = '<div><div class="rgpause" style="left:32%"></div><div class="rgpause" style="right:32%"></div></div><div class="rgplay"></div><div class="rgstop"></div>';
 	hide(dMain.appendChild(dControl));
 	setBtns();
 	addListener(window, 'resize', winResize);
