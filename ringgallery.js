@@ -16,22 +16,25 @@ var	dMain = ndiv('rgmain'),
 	btnSlide, btnStop, btnFirst, btnPrev, btnNext, btnLast, btnIndex, btnPlay, btnPause,
 	npics = pics.length,
 	ipic = 0,
-	slideShow = false,
 	sTransition, sTransform,
 	hasVideo = false,
 	bgZoom,
-	ssLastPic = 0, ssInterval = 0, ssNextTime = 0, ssPause = false,
+	ssOn = false, ssLast = 0, ssInt = 0, ssNext = 0, ssPause = false,
 	SS_DELAY = 3000, TIMER_MOVE_MS = 150, TIMER_SLIDESHOW_MS = 900,
-	scrollX = 0, touchX,
+	scrollX = 0, touchX, touchNext, touchPrev,
 	htmlWait,
-	menuAlways = false, inBottom = false, menuHideTimeout = 0;
+	isMenuAlways = false, inBottom = false, menuHideTimeout = 0;
+
+
+/*
+** CSS functions
+*/
+function cssfx2(p, s) {
+	return p + s + p + '-webkit-' + s + p + '-moz-' + s + p + '-ms-' + s;
+}
 
 function cssfx(s) {
 	return cssfx2('', s);
-}
-
-function cssfx2(p, s) {
-	return p + s + p + '-webkit-' + s + p + '-moz-' + s + p + '-ms-' + s;
 }
 
 function c2h(c,a) {
@@ -41,6 +44,22 @@ function c2h(c,a) {
 function cssBg(c0,c1,a) {
 	return 'background:none;' + cssfx2('background:','linear-gradient(top,rgba('+c0+','+c0+','+c0+','+a+'),rgba('+c1+','+c1+','+c1+','+a+'));') +
 		"filter:progid:DXImageTransform.Microsoft.gradient(startColorStr='#" + c2h(c0,a) + "',endColorStr='#" + c2h(c1,a) + "');";
+}
+
+function cssTrn(e, s) {
+	if (sTransition) {
+		e.style[sTransition] = s;
+	}
+}
+
+function nEl(n, c) {
+	var d = document.createElement(n);
+	d.className = c || '';
+	return d;
+}
+
+function ndiv(c) {
+	return nEl('div', c);
 }
 
 function initCss() {
@@ -62,7 +81,11 @@ function initCss() {
 
 	function add(a,b) {
 		try {
-			css.insertRule ? css.insertRule(a+ '{' + b + '}',0) : css.addRule(a,b);
+			if (css.insertRule) {
+				css.insertRule(a+ '{' + b + '}',0);
+			} else {
+				css.addRule(a,b);
+			}
 		} catch (err) { }
 	}
 
@@ -125,12 +148,8 @@ function initCss() {
 		'text-align:left;' +
 		'left:0;width:100%;height:2em;bottom:100%');
 
-	add('.rgvmtr',
-		absinline +
-		cssBg(48,48,0.3) +
-		'width:100%;height:6px;bottom:0');
-
-	s = absinline + 'left:0;height:5px;';
+	s = absinline + 'left:0;width:100%;height:6px;';
+	add('.rgvmtr', s + cssBg(48,48,0.3) + 'bottom:0');
 	add('.rgvmtr0', s + cssBg(255,220,1));
 	add('.rgvmtr1', s + cssBg(255,220,0.2));
 
@@ -237,71 +256,6 @@ function initCss() {
 	}
 }
 
-function nEl(n, c) {
-	var d = document.createElement(n);
-	d.className = c || '';
-	return d;
-}
-
-function ndiv(c) {
-	return nEl('div', c);
-}
-
-function addBox() {
-	var box = ndiv('rgbox'),
-		imgbox = ndiv('rgimgbox'),
-		vidbox = ndiv('rgimgbox'),
-		wait = ndiv('rgwait'),
-		img = new Image(),
-		vid = nEl('video', 'rgvideo');
-
-	dScroll.appendChild(box);
-	hide(box.appendChild(imgbox));
-	hide(box.appendChild(vidbox));
-	hide(box.appendChild(wait));
-	hide(imgbox.appendChild(img));
-	vidbox.appendChild(vid);
-	wait.innerHTML = htmlWait;
-	if (bgZoom) {
-		img.style.maxWidth = '100%';
-	}
-	img.onload = img.onerror = imgCallback;
-	if (vid.play) {
-		hasVideo = true;
-		vid.preload = 'none';
-		vid.onplay = vid.onpause = vid.onreadystatechange = setControls;
-		addListener(vid, 'timeupdate', vidTimer);
-		addListener(vid, 'progress', vidBuffer);
-	}
-}
-
-function clearBox(box) {
-	var imgbox = box.firstChild,
-		vidbox = imgbox.nextSibling;
-	hide(imgbox);
-	hide(vidbox);
-	vidStop(vidbox.firstChild);
-}
-
-function getVid(n) {
-	return dScroll.childNodes[n].childNodes[1].firstChild;
-}
-
-function getImg(n) {
-	return dScroll.childNodes[n].firstChild.firstChild;
-}
-
-function imgResize(img) {
-	if (bgZoom && imgComplete(img)) {
-		var pp = img.parentNode.parentNode,
-			bw = pp.clientWidth, bh = pp.clientHeight,
-			iw = img.width, ih = img.height;
-		if (iw && ih && bw && bh) {
-			img.parentNode.style.zoom = (Math.min(bw * 100 / iw, bh * 100 / ih)) + '%';
-		}
-	}
-}
-
 function showBtn(e, b) {
 	e.style.display = b ? 'inline-block' : 'none';
 }
@@ -318,6 +272,77 @@ function isHide(e) {
 	return e.style.visibility == 'hidden';
 }
 
+function setBtns() {
+	var n = !ssOn;
+	showBtn(btnSlide, n);
+	showBtn(btnStop, ssOn);
+	showBtn(btnPlay, ssOn && ssPause);
+	showBtn(btnPause, ssOn && !ssPause);
+	showBtn(btnFirst, n);
+	showBtn(btnLast, n);
+	showBtn(btnIndex, n);
+}
+
+function getVid(n) {
+	return dScroll.childNodes[n].childNodes[1].firstChild;
+}
+
+function getImg(n) {
+	return dScroll.childNodes[n].firstChild.firstChild;
+}
+
+/*
+** Video playback timer display
+*/
+function t2s(s) {
+	var m = ~~(s / 60);
+	s = ~~s % 60;
+	return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+function vidTimer() {
+	var vid = this, w = '0', s = '';
+	if (vid == getVid(1) && vid.duration) {
+		w = (vid.currentTime * 100 / vid.duration) + '%';
+		s = t2s(vid.currentTime) + ' / ' + t2s(vid.duration);
+	}
+	dVmeter.lastChild.style.width = w;
+	dVtime.innerHTML = s;
+	unHide(dVbar);
+}
+
+function vidBuffer() {
+	var vid = this;
+	dVmeter.firstChild.style.width = (vid == getVid(1) && vid.duration && vid.buffered.end(0)) ?  (vid.buffered.end(0) * 100 / vid.duration) + '%' : '0';
+}
+
+function setControls() {
+	var	vid = getVid(1),
+		type = -1, 
+		v = false,
+		i, c;
+	if (hasVideo && !isHide(vid.parentNode)) {
+		if (vid.ended) {
+			type = 2;
+		} else if (vid.paused) {
+			type = vid.currentTime == 0 ? 1 : 0;
+		}
+		v  = vid.duration;
+	} else if (ssOn && ssPause) {
+		type = 0;
+	}
+	v ? unHide(dVbar) : hide(dVbar);
+	type >= 0 ? unHide(dControl) : hide(dControl);
+	for (i = 0; i < 3; i++) {
+		c = dControl.childNodes[i];
+		type == i ? unHide(c) : hide(c);
+	}
+}
+
+function imgComplete(img) {
+	return img.complete || img.readyState == 'complete';
+}
+
 function imgCallback() {
 	var imgbox = this.parentNode;
 	if (imgComplete(this) && !isHide(imgbox)) {
@@ -325,6 +350,36 @@ function imgCallback() {
 		imgResize(this);
 		if (this == getImg(1) && ipic < npics - 1) {
 			setPic(2, ipic + 1);
+		}
+	}
+}
+
+function addListener(e, n, fn) {
+	e.addEventListener ?  e.addEventListener(n, fn, false) : e.attachEvent('on' + n, fn);
+}
+
+function vidStop(vid) {
+	if (hasVideo && !isHide(vid.parentNode)) {
+		vid.pause();
+		vid.removeAttribute('src');
+	}
+}
+
+function clearBox(box) {
+	var imgbox = box.firstChild,
+		vidbox = imgbox.nextSibling;
+	hide(imgbox);
+	hide(vidbox);
+	vidStop(vidbox.firstChild);
+}
+
+function imgResize(img) {
+	if (bgZoom && imgComplete(img)) {
+		var pp = img.parentNode.parentNode,
+			bw = pp.clientWidth, bh = pp.clientHeight,
+			iw = img.width, ih = img.height;
+		if (iw && ih && bw && bh) {
+			img.parentNode.style.zoom = (Math.min(bw * 100 / iw, bh * 100 / ih)) + '%';
 		}
 	}
 }
@@ -368,65 +423,13 @@ function setPic(n, p) {
 	}
 }
 
-function vidStop(vid) {
-	if (hasVideo && !isHide(vid.parentNode)) {
-		vid.pause();
-		vid.removeAttribute('src');
-	}
-}
-
 function doClick(fn) {
 	var vid = getVid(1);
 	if (hasVideo && !isHide(vid.parentNode) && !vid.ended) {
 		vid.paused ? vid.play() : vid.pause();
 		setControls();
 	} else {
-		slideShow ? slidePlayPause() : fn();
-	}
-}
-
-function t2s(s) {
-	var m = ~~(s / 60);
-	s = ~~s % 60;
-	return m + ':' + (s < 10 ? '0' : '') + s;
-}
-
-function vidTimer() {
-	var vid = this, w = '0', s = '';
-	if (vid == getVid(1) && vid.duration) {
-		w = (vid.currentTime * 100 / vid.duration) + '%';
-		s = t2s(vid.currentTime) + ' / ' + t2s(vid.duration);
-	}
-	dVmeter.lastChild.style.width = w;
-	dVtime.innerHTML = s;
-	unHide(dVbar);
-}
-
-function vidBuffer() {
-	var vid = this;
-	dVmeter.firstChild.style.width = (vid == getVid(1) && vid.duration && vid.buffered.end(0)) ?  (vid.buffered.end(0) * 100 / vid.duration) + '%' : '0';
-}
-
-function setControls() {
-	var	vid = getVid(1),
-		type = -1, 
-		v = false,
-		i, c;
-	if (hasVideo && !isHide(vid.parentNode)) {
-		if (vid.ended) {
-			type = 2;
-		} else if (vid.paused) {
-			type = vid.currentTime == 0 ? 1 : 0;
-		}
-		v  = vid.duration;
-	} else if (slideShow && ssPause) {
-		type = 0;
-	}
-	v ? unHide(dVbar) : hide(dVbar);
-	type >= 0 ? unHide(dControl) : hide(dControl);
-	for (i = 0; i < 3; i++) {
-		c = dControl.childNodes[i];
-		type == i ? unHide(c) : hide(c);
+		ssOn ? slidePlayPause() : fn();
 	}
 }
 
@@ -437,10 +440,13 @@ function scroll2view() {
 }
 
 function viewPic() {
-	cssTrn(dScroll, 'all ' + (slideShow ? TIMER_SLIDESHOW_MS + 'ms ease': TIMER_MOVE_MS + 'ms linear'));
+	cssTrn(dScroll, 'all ' + (ssOn ? TIMER_SLIDESHOW_MS + 'ms ease': TIMER_MOVE_MS + 'ms linear'));
 	scroll2view();
 }
 
+/*
+** Photo navigation
+*/
 function gotoPic(n) {
 	var dx = scrollX, dd, img;
 	cssTrn(dScroll, '');
@@ -465,7 +471,7 @@ function gotoPic(n) {
 		setPic(2, ipic + 1);
 	}
 	setTimeout(viewPic, 50);
-	if (!slideShow) {
+	if (!ssOn) {
 		menuPeek();
 	}
 	if (n == 0) {
@@ -478,20 +484,14 @@ function picLast(){gotoPic(2);}
 function picNext(){gotoPic(1);}
 function picPrev(){gotoPic(-1);}
 
-function cssTrn(e, s) {
-	if (sTransition) {
-		e.style[sTransition] = s;
-	}
-}
-
 function setScrollX(x) {
 	scrollX = x;
-	sTransform ? dScroll.style[sTransform] = 'translate3d(' + x + 'px,0,0)' : dScroll.style.left = x + 'px';
+	if (sTransform) {
+		dScroll.style[sTransform] = 'translate3d(' + x + 'px,0,0)';
+	} else {
+		dScroll.style.left = x + 'px';
+	}
 	return x;
-}
-
-function addListener(e, n, fn) {
-	e.addEventListener ?  e.addEventListener(n, fn, false) : e.attachEvent('on' + n, fn);
 }
 
 function addBtn(tip, flt, fn, gif) {
@@ -502,8 +502,20 @@ function addBtn(tip, flt, fn, gif) {
 	return dMenu.appendChild(btn);
 }
 
-function imgComplete(img) {
-	return img.complete || img.readyState == 'complete';
+/*
+** Slide show functions
+*/
+function slideStop() {
+	if (!ssOn) {
+		return;
+	}
+	if (ssInt != 0) {
+		clearInterval(ssInt);
+		ssInt = 0;
+	}
+	ssOn = false;
+	setBtns();
+	setControls();
 }
 
 function slideShowFn() {
@@ -513,15 +525,15 @@ function slideShowFn() {
 	if (isvid && !vid.ended) {
 		return;
 	}
-	if (ipic == ssLastPic) {
-		stopSlide();
+	if (ipic == ssLast) {
+		slideStop();
 	} else if (!ssPause) {
 		now = new Date().getTime();
-		if (now > ssNextTime) {
+		if (now > ssNext) {
 			vid = getVid(2);
 			isvid = (hasVideo && !isHide(vid.parentNode));
 			if (isvid || imgComplete(getImg(2))) {
-				ssNextTime = now + SS_DELAY + (sTransition ? TIMER_SLIDESHOW_MS : 0);
+				ssNext = now + SS_DELAY + (sTransition ? TIMER_SLIDESHOW_MS : 0);
 				picNext();
 				setPic(2, ipic + 1);
 				if (isvid) {
@@ -532,41 +544,17 @@ function slideShowFn() {
 	}
 }
 
-function stopSlide() {
-	if (!slideShow) {
-		return;
-	}
-	if (ssInterval != 0) {
-		clearInterval(ssInterval);
-		ssInterval = 0;
-	}
-	slideShow = false;
-	setBtns();
-	setControls();
-}
-
-function setBtns() {
-	var n = !slideShow;
-	showBtn(btnSlide, n);
-	showBtn(btnStop, slideShow);
-	showBtn(btnPlay, slideShow && ssPause);
-	showBtn(btnPause, slideShow && !ssPause);
-	showBtn(btnFirst, n);
-	showBtn(btnLast, n);
-	showBtn(btnIndex, n);
-}
-
 function goSlideShow() {
 	var vid = getVid(1),
 		isvid = (hasVideo && !isHide(vid.parentNode));
-	if (slideShow) {
-		stopSlide();
+	if (ssOn) {
+		slideStop();
 		return;
 	}
-	slideShow = true;
-	ssLastPic = (ipic - 1 + npics) % npics;
-	ssInterval = setInterval(slideShowFn, 200);
-	ssNextTime = new Date().getTime() + SS_DELAY;
+	ssOn = true;
+	ssLast = (ipic - 1 + npics) % npics;
+	ssInt = setInterval(slideShowFn, 200);
+	ssNext = new Date().getTime() + SS_DELAY;
 	ssPause = false;
 	setPic(2, ipic + 1);
 	setBtns();
@@ -576,11 +564,11 @@ function goSlideShow() {
 }
 
 function slidePlayPause() {
-	if (!slideShow) {
+	if (!ssOn) {
 		return;
 	}
 	if (ssPause) {
-		ssNextTime = new Date().getTime() + SS_DELAY;
+		ssNext = new Date().getTime() + SS_DELAY;
 	}
 	ssPause = !ssPause;
 	setBtns();
@@ -588,13 +576,13 @@ function slidePlayPause() {
 	menuPeek();
 }
 
-this.stopGallery = function() {
-	stopSlide();
-	vidStop(getVid(1));
-	if (isFullScr()) {
-		goFull();
-	}
-};
+/*
+** Full screen functions
+*/
+function isFullScr() {
+	var doc = document;
+	return doc.fullscreenElement || doc.mozFullScreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement;
+}
 
 function goFull() {
 	var doc = document;
@@ -625,15 +613,18 @@ function goFull() {
 	dMain.focus();
 }
 
+function goBack() {
+	window.history.back();
+}
+
+/*
+** Photo Index
+*/
 function chooseIndex() {
 	ipic = parseInt(this.id);
 	setPic(1, ipic);
 	scroll2view();
 	hide(dIndex);
-}
-
-function goBack() {
-	window.history.back();
 }
 
 function goIndex() {
@@ -654,32 +645,36 @@ function goIndex() {
 	dMain.appendChild(dIndex).appendChild(dv);
 }
 
+
+/*
+** Functions for handling hiding/showing of menu bar
+*/
 function menuOn() {
 	dMenu.style.top = '0';
 	unHide(btnPrev);
 	unHide(btnNext);
 }
 
-function forceMenu(up) {
-	menuAlways = up;
-	if (up && menuHideTimeout != 0) {
+function menuHide() {
+	dMenu.style.top = '100%';
+	hide(btnPrev);
+	hide(btnNext);
+	menuHideTimeout = 0;
+}
+
+function menuHideOff() {
+	if (menuHideTimeout != 0) {
 		clearTimeout(menuHideTimeout);
 		menuHideTimeout = 0;
 	}
-	up ?  menuOn() : menuOff();
 }
 
-function mouseBottom(enter) {
-	inBottom = enter;
-	if (enter) {
-		if (menuHideTimeout != 0) {
-			clearTimeout(menuHideTimeout);
-			menuHideTimeout = 0;
-		}
-		menuOn();
-	} else {
-		menuOff();
+function menuOff() {
+	if (isMenuAlways) {
+		return;
 	}
+	menuHideOff();
+	menuHideTimeout = setTimeout(menuHide, 2500);
 }
 
 function menuPeek() {
@@ -689,19 +684,46 @@ function menuPeek() {
 	}
 }
 
+function menuAlways(on) {
+	isMenuAlways = on;
+	if (on) {
+		menuHideOff();
+		menuOn();
+	} else {
+		menuOff();
+	}
+}
+
+function mouseBottomEnter() {
+	inBottom = true;
+	menuHideOff();
+	menuOn();
+}
+
+function mouseBottomLeave() {
+	inBottom = false;
+	menuOff();
+}
+
+/*
+** Handle touch and mouse events
+*/
 function doTouch(phase, sx, dx) {
 	var ww = dMain.clientWidth, xx;
 	if (phase == 'move') {
 		xx = setScrollX(dx + touchX);
-		if (xx < -ww * 1.05) {
+		if (!touchNext && xx < -ww * 1.05) {
 			setPic(2, ipic + 1);
-		} else if (xx > -ww * 0.95) {
+			touchNext = true;
+		} else if (!touchPrev && xx > -ww * 0.95) {
 			setPic(0, ipic - 1);
+			touchPrev = true;
 		}
 	} else if (phase == 'start') {
-		touchX = scrollX || 0;
+		touchX = scrollX;
+		touchNext = touchPrev = false;
 		cssTrn(dScroll, '');
-		forceMenu(true);
+		menuAlways(true);
 	} else if (phase == 'end') {
 		if (scrollX < -ww * 1.2) {
 			picNext();
@@ -710,53 +732,16 @@ function doTouch(phase, sx, dx) {
 		} else {
 			gotoPic(0);
 		}
-		forceMenu(false);
+		menuAlways(false);
 	} else if (phase == 'abort') {
-		doClick(sx < ww * 0.2 ? picPrev : picNext);
-		forceMenu(false);
-	}
-}
-
-function isFullScr() {
-	var doc = document;
-	return doc.fullscreenElement || doc.mozFullScreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement;
-}
-
-function winResize() {
-	var i;
-	for (i = 0; i < 3; i++) {
-		imgResize(getImg(i));
-	}
-	cssTrn(dScroll, '');
-	scroll2view();
-}
-
-function keyDown(e) {
-	e = e || window.event;
-	if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) {
-		return;
-	}
-	switch (e.keyCode) {
-	case 36:
-		picFirst();
-		break;
-	case 37:
-		picPrev();
-		break;
-	case 39:
-		picNext();
-		break;
-	case 35:
-		picLast();
-		break;
-	case 27:
-		if (slideShow) {
-			stopSlide();
+		if (sx < ww * 0.2) {
+			picPrev();
+		} else if (sx > ww * 0.8) {
+			picNext();
+		} else {
+			doClick(picNext);
 		}
-		break;
-	case 32:
-		doClick(picNext);
-		break;
+		menuAlways(false);
 	}
 }
 
@@ -766,8 +751,16 @@ function addTouch() {
 		inTouch = false;
 
 	function doPrevent(e) {
-		e.preventDefault ? e.preventDefault() : e.returnValue = false;
-		e.stopPropagation ? e.stopPropagation() : e.cancelBubble = true;
+		if (e.preventDefault) {
+			e.preventDefault();
+		} else {
+			e.returnValue = false;
+		}
+		if (e.stopPropagation) {
+			e.stopPropagation();
+		} else {
+			e.cancelBubble = true;
+		}
 	}
 
 	function moveIt(e, x) {
@@ -789,71 +782,84 @@ function addTouch() {
 		doTouch(Math.abs(distX) <= 0 ? 'abort' : 'end', startX, distX);
 	}
 
-	addListener(dScroll, 'touchstart', function(e) {
+	function touchStart(e) {
 		if (!inTouch && !inMouse && e.changedTouches.length == 1) {
 			inTouch = true;
 			startX = e.changedTouches[0].pageX;
 			moveStart(e);
 		}
-	});
-	addListener(dScroll, 'touchmove', function(e) {
+	}
+
+	function touchMove(e) {
 		if (inTouch) {
 			moveIt(e, e.changedTouches[0].pageX - startX);
 		}
-	});
-	addListener(dScroll, 'touchend', function(e) {
+	}
+
+	function touchEnd(e) {
 		if (inTouch) {
 			inTouch = false;
 			moveEnd(e);
 		}
-	});
-	addListener(dScroll, 'mousedown', function(e) {
+	}
+
+	function mouseDown(e) {
 		if (!inTouch && !inMouse && ((e.which || e.button) == 1)) {
 			inMouse = true;
 			startX = e.pageX || e.clientX;
 			moveStart(e);
 		}
-	});
-	addListener(dScroll, 'mousemove', function(e) {
+	}
+
+	function mouseMove(e) {
 		if (inMouse) {
 			moveIt(e, (e.pageX || e.clientX) - startX);
 		}
-	});
-	addListener(dScroll, 'mouseup', function(e) {
+	}
+
+	function mouseUp(e) {
 		if (inMouse) {
 			inMouse = false;
 			moveEnd(e);
 		}
-	});
+	}
+
+	addListener(dScroll, 'touchstart', touchStart);
+	addListener(dScroll, 'touchmove', touchMove);
+	addListener(dScroll, 'touchend', touchEnd);
+	addListener(dScroll, 'mousedown', mouseDown);
+	addListener(dScroll, 'mousemove', mouseMove);
+	addListener(dScroll, 'mouseup', mouseUp);
 }
 
-this.setGallery = function(p, path) {
-	urlPath = path || '';
-	pics = p;
-	npics = p.length;
-	ipic = 0;
-	if (dIndex) {
-		dMain.removeChild(dIndex);
-	}
-	dIndex = null;
-	gotoPic(0);
-	setBtns();
-	winResize();
-};
-
-function menuOff() {
-	if (menuAlways) {
+/*
+** Handle key press
+*/
+function keyDown(e) {
+	e = e || window.event;
+	if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) {
 		return;
 	}
-	if (menuHideTimeout != 0) {
-		clearTimeout(menuHideTimeout);
+	switch (e.keyCode) {
+	case 36:
+		picFirst();
+		break;
+	case 37:
+		picPrev();
+		break;
+	case 39:
+		picNext();
+		break;
+	case 35:
+		picLast();
+		break;
+	case 27:
+		slideStop();
+		break;
+	case 32:
+		doClick(picNext);
+		break;
 	}
-	menuHideTimeout = setTimeout(function() {
-		dMenu.style.top = '100%';
-		hide(btnPrev);
-		hide(btnNext);
-		menuHideTimeout = 0;
-	}, 2500);
 }
 
 function navBtn(p) {
@@ -864,6 +870,9 @@ function navBtn(p) {
 	return dMain.appendChild(btn);
 }
 
+/*
+** Create buttons and 
+*/
 function menuBtns() {
 	var doc = document;
 	btnIndex= addBtn('Index', 'left', goIndex, 'R0lGODlhDQANAIAAAP///wAA/yH5BAEKAAEALAAAAAANAA0AAAIchBMGqMqX2orToYuzzrbLV30UuJUmOVJe2KBKAQA7');
@@ -883,8 +892,47 @@ function menuBtns() {
 	btnPrev = navBtn('left');
 	btnNext = navBtn('right');
 	dVbar.appendChild(dVtime);
-	dVbar.appendChild(dVmeter).innerHTML = '<div class="rgvmtr1"></div><div class="rgvmtr0"></div>';
+	dVbar.appendChild(dVmeter);
+	dVmeter.appendChild(ndiv('rgvmtr1'));
+	dVmeter.appendChild(ndiv('rgvmtr0'));
 	hide(dMenu.appendChild(dVbar));
+}
+
+function winResize() {
+	var i;
+	for (i = 0; i < 3; i++) {
+		imgResize(getImg(i));
+	}
+	cssTrn(dScroll, '');
+	scroll2view();
+}
+
+function addBox() {
+	var box = ndiv('rgbox'),
+		imgbox = ndiv('rgimgbox'),
+		vidbox = ndiv('rgimgbox'),
+		wait = ndiv('rgwait'),
+		img = new Image(),
+		vid = nEl('video', 'rgvideo');
+
+	dScroll.appendChild(box);
+	hide(box.appendChild(imgbox));
+	hide(box.appendChild(vidbox));
+	hide(box.appendChild(wait));
+	hide(imgbox.appendChild(img));
+	vidbox.appendChild(vid);
+	wait.innerHTML = htmlWait;
+	if (bgZoom) {
+		img.style.maxWidth = '100%';
+	}
+	img.onload = img.onerror = imgCallback;
+	if (vid.play) {
+		hasVideo = true;
+		vid.preload = 'none';
+		vid.onplay = vid.onpause = vid.onreadystatechange = setControls;
+		addListener(vid, 'timeupdate', vidTimer);
+		addListener(vid, 'progress', vidBuffer);
+	}
 }
 
 function main() {
@@ -902,8 +950,8 @@ function main() {
 	setBtns();
 	addListener(window, 'resize', winResize);
 	addListener(window, 'orientationchange', winResize);
-	d0.onmouseenter = function(){mouseBottom(true);};
-	d0.onmouseleave = function(){mouseBottom(false);};
+	d0.onmouseenter = mouseBottomEnter;
+	d0.onmouseleave = mouseBottomLeave;
 	cssTrn(dMenu, 'all 250ms linear');
 	addTouch();
 	dOuter.appendChild(dMain);
@@ -911,5 +959,28 @@ function main() {
 	scroll2view();
 	dMain.focus();
 }
+
+this.setGallery = function(p, path) {
+	urlPath = path || '';
+	pics = p;
+	npics = p.length;
+	ipic = 0;
+	if (dIndex) {
+		dMain.removeChild(dIndex);
+	}
+	dIndex = null;
+	gotoPic(0);
+	setBtns();
+	winResize();
+};
+
+this.stopGallery = function() {
+	slideStop();
+	vidStop(getVid(1));
+	if (isFullScr()) {
+		goFull();
+	}
+};
+
 main();
 }
