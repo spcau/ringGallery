@@ -21,7 +21,11 @@ function initCss() {
 
 	function add(a,b) {
 		try {
-			(css.insertRule) ?  css.insertRule(a+'{'+b+'}',0) : css.addRule(a,b);
+			if (css.insertRule) {
+				css.insertRule(a+'{'+b+'}',0);
+			} else {
+				css.addRule(a,b);
+			}
 		} catch (err) { }
 	}
 
@@ -100,12 +104,12 @@ function nText(cl, s) {
 	return e;
 }
 
-function cssfx(s) {
-	return s + '-webkit-'+s + '-moz-'+s + '-ms-'+s;
-}
-
 function cssfx2(p, s) {
 	return p+s + p+'-webkit-' + s + p+'-moz-' + s + p+'-ms-'+s;
+}
+
+function cssfx(s) {
+	return cssfx2('', s);
 }
 
 function albumUrl(s) {
@@ -128,23 +132,24 @@ function albumUrl(s) {
 
 function endGallery() {
 	aMenus[0].style.top = '0';
-	dGallery.style.top = '100%';
+	dGallery.style.top = '110%';
 	hashGallery = undefined;
 }
 
 function goMenuback() {
-	if (aMenus.length > 1) {
-		var m1 = aMenus[0], 
-			m2 = aMenus[1];
-		setTimeout(function() {
-				m1.style.left = '100%';
-				m2.style.left = '0';
-			}, 50);
-		aMenus.splice(0, 1);
-		setTimeout(function() {
-				dMain.removeChild(m1);
-			}, TRANSITION_MS);
+	if (aMenus.length <= 0) {
+		return;
 	}
+	var m1 = aMenus[0],
+		m2 = aMenus[1];
+	aMenus.splice(0, 1);
+	setTimeout(function() {
+			m1.style.left = '110%';
+			m2.style.left = '0';
+		}, 50);
+	setTimeout(function() {
+			dMain.removeChild(m1);
+		}, TRANSITION_MS + 100);
 }
 
 function hashID() {
@@ -198,7 +203,7 @@ function addChoice(pn, c, dv) {
 			dv.appendChild(nText('ranumber', nvideo + '&nbsp;Video' + (nvideo>1 ?'s.':'.')));
 		}
 		dv.onclick = function() {
-				aMenus[0].style.top = '-100%';
+				aMenus[0].style.top = '-110%';
 				dGallery.style.top = '0';
 				if (oGallery === null) {
 					oGallery = new ringGallery(dGallery, cg, pn.path);
@@ -253,10 +258,10 @@ function setupMenu(pn, data, id) {
 	}
 	dMain.appendChild(m0);
 	if (aMenus.length > 1) {
-		m0.style.left = '100%';
+		m0.style.left = '110%';
 		setTimeout(function() {
 			m0.style.left = '0';
-			aMenus[1].style.left = '-100%';
+			aMenus[1].style.left = '-110%';
 		}, 50);
 	} else {
 		m0.style.left = '0';
@@ -318,8 +323,12 @@ function hashChange() {
 	}
 }
 
-initCss();
-dOuter.appendChild(dMain).appendChild(dGallery);
-readAlbum(albumUrl(albumJson));
-window.onhashchange = hashChange;
+function main() {
+	initCss();
+	dOuter.appendChild(dMain).appendChild(dGallery);
+	readAlbum(albumUrl(albumJson));
+	window.onhashchange = hashChange;
+}
+
+main();
 }

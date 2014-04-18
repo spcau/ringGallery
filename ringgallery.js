@@ -13,7 +13,8 @@ var	dMain = ndiv('rgmain'),
 	dVtime = ndiv('rgvtime'),
 	dNumber = ndiv('rgnum'),
 	dIndex = null,
-	btnSlide, btnStop, btnFirst, btnPrev, btnNext, btnLast, btnIndex, btnPlay, btnPause,
+	navPrev, navNext,
+	btnSlide, btnStop, btnFirst, btnLast, btnIndex, btnPlay, btnPause,
 	npics = pics.length,
 	ipic = 0,
 	sTransition, sTransform,
@@ -317,7 +318,7 @@ function vidBuffer() {
 
 function setControls() {
 	var	vid = getVid(1),
-		type = -1, 
+		type = -1,
 		v = false,
 		i, c;
 	if (hasVideo && !isHide(vid.parentNode)) {
@@ -448,11 +449,6 @@ function scroll2view() {
 	setControls();
 }
 
-function viewPic() {
-	cssTrn(dScroll, 'all ' + (ssOn ? TIMER_SLIDESHOW_MS + 'ms ease': TIMER_MOVE_MS + 'ms linear'));
-	scroll2view();
-}
-
 /*
 ** Photo navigation
 */
@@ -480,7 +476,9 @@ function gotoPic(n) {
 	if (n == 1 && !isHide(img.parentNode) && imgComplete(img)) {
 		setPic(2, ipic + 1);
 	}
-	setTimeout(viewPic, 50);
+	setTimeout(function() {
+		cssTrn(dScroll, 'all ' + (ssOn ? TIMER_SLIDESHOW_MS + 'ms ease': TIMER_MOVE_MS + 'ms linear'));
+		scroll2view();}, 50);
 	if (!ssOn) {
 		menuPeek();
 	}
@@ -535,7 +533,6 @@ function slideShowFn() {
 			if (isvid || imgComplete(getImg(2))) {
 				ssNext = now + SS_DELAY + (sTransition ? TIMER_SLIDESHOW_MS : 0);
 				picNext();
-				setPic(2, ipic + 1);
 				if (isvid) {
 					setTimeout(function(){ vid.play(); }, TIMER_SLIDESHOW_MS);
 				}
@@ -613,10 +610,6 @@ function goFull() {
 	dMain.focus();
 }
 
-function goBack() {
-	window.history.back();
-}
-
 /*
 ** Photo Index
 */
@@ -624,11 +617,13 @@ function chooseIndex() {
 	ipic = parseInt(this.id);
 	setPic(1, ipic);
 	scroll2view();
+	hide(dIndex.firstChild);
 	hide(dIndex);
 }
 
 function goIndex() {
 	if (dIndex) {
+		unHide(dIndex.firstChild);
 		unHide(dIndex);
 		return;
 	}
@@ -651,14 +646,14 @@ function goIndex() {
 */
 function menuOn() {
 	dMenu.style.top = '0';
-	unHide(btnPrev);
-	unHide(btnNext);
+	unHide(navPrev);
+	unHide(navNext);
 }
 
 function menuHide() {
 	dMenu.style.top = '100%';
-	hide(btnPrev);
-	hide(btnNext);
+	hide(navPrev);
+	hide(navNext);
 	menuHideTimeout = 0;
 }
 
@@ -871,7 +866,7 @@ function navBtn(p) {
 }
 
 /*
-** Create buttons and 
+** Create buttons
 */
 function menuBtns() {
 	var doc = document;
@@ -886,11 +881,13 @@ function menuBtns() {
 	}
 	btnSlide = addBtn('Slide Show', 'right', goSlideShow, 'R0lGODlhDwAQAIABAP///wAAACH5BAEKAAEALAAAAAAPABAAAAIohI8JEcvfmJHwuVQlovneHDVbNzqVpyneAWLhqXGwyJK1CaFvnqpKAQA7');
 	if (dOuter.className == 'ragallery') {
-		addBtn('Go Back', 'right', goBack, 'R0lGODlhDAAOAIAAAP///////yH5BAEKAAEALAAAAAAMAA4AAAIYBBKme8mGopxUQvdubrVXvTWbR07giDEFADs=');
+		addBtn('Go Back', 'right', function() {
+				window.history.back();
+			}, 'R0lGODlhDAAOAIAAAP///////yH5BAEKAAEALAAAAAAMAA4AAAIYBBKme8mGopxUQvdubrVXvTWbR07giDEFADs=');
 	}
 	dMenu.appendChild(dNumber);
-	btnPrev = navBtn('left');
-	btnNext = navBtn('right');
+	navPrev = navBtn('left');
+	navNext = navBtn('right');
 	dVbar.appendChild(dVtime);
 	dVbar.appendChild(dVmeter);
 	dVmeter.appendChild(ndiv('rgvmtr1'));
