@@ -17,10 +17,9 @@ var	dMain = ndiv('rgmain'),
 	npics = pics.length,
 	ipic = 0,
 	sTransition, sTransform,
-	hasVideo = false,
-	bgZoom,
+	hasVideo = false, bgZoom,
 	ssOn = false, ssLast = 0, ssInt = 0, ssNext = 0, ssPause = false,
-	SS_DELAY = 3000, TIMER_MOVE_MS = 150, TIMER_SLIDESHOW_MS = 900,
+	SS_DELAY = 3000, TIMER_MOVE_MS = 150, TIMER_SLIDESHOW_MS = 1200,
 	scrollX = 0, touchX, touchNext, touchPrev,
 	htmlWait,
 	isMenuAlways = false, inBottom = false, menuHideTimeout = 0;
@@ -433,6 +432,16 @@ function doClick(fn) {
 	}
 }
 
+function setScrollX(x) {
+	scrollX = x;
+	if (sTransform) {
+		dScroll.style[sTransform] = 'translate3d(' + x + 'px,0,0)';
+	} else {
+		dScroll.style.left = x + 'px';
+	}
+	return x;
+}
+
 function scroll2view() {
 	setScrollX(-dMain.clientWidth);
 	dNumber.innerHTML = (ipic+1) + '/' + npics;
@@ -453,19 +462,20 @@ function gotoPic(n) {
 	if (n == 1 || (n == 2 && ipic < npics - 1)) {
 		vidStop(getVid(1));
 		dd = dScroll.firstChild;
-		dScroll.appendChild(dd);
 		setScrollX(dx + dd.clientWidth);
+		dScroll.appendChild(dd);
 		ipic = n == 1 ? (ipic + 1) % npics : npics - 1;
 		clearBox(dd);
 	} else if (n == -1 || (n == -2 && ipic > 0)) {
 		vidStop(getVid(1));
 		dd = dScroll.lastChild;
-		dScroll.insertBefore(dd, dScroll.firstChild);
 		setScrollX(dx - dd.clientWidth);
+		dScroll.insertBefore(dd, dScroll.firstChild);
 		ipic = n == -1 ? (ipic - 1 + npics) % npics : 0;
 		clearBox(dd);
+	} else {
+		setPic(1, ipic);
 	}
-	setPic(1, ipic);
 	img = getImg(1);
 	if (n == 1 && !isHide(img.parentNode) && imgComplete(img)) {
 		setPic(2, ipic + 1);
@@ -483,16 +493,6 @@ function picFirst(){gotoPic(-2);}
 function picLast(){gotoPic(2);}
 function picNext(){gotoPic(1);}
 function picPrev(){gotoPic(-1);}
-
-function setScrollX(x) {
-	scrollX = x;
-	if (sTransform) {
-		dScroll.style[sTransform] = 'translate3d(' + x + 'px,0,0)';
-	} else {
-		dScroll.style.left = x + 'px';
-	}
-	return x;
-}
 
 function addBtn(tip, flt, fn, gif) {
 	var btn = ndiv('rgbtn');
@@ -674,7 +674,7 @@ function menuOff() {
 		return;
 	}
 	menuHideOff();
-	menuHideTimeout = setTimeout(menuHide, 2500);
+	menuHideTimeout = setTimeout(menuHide, 3500);
 }
 
 function menuPeek() {
