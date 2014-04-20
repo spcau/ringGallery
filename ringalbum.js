@@ -205,10 +205,10 @@ function addChoice(pn, c, dv) {
 		dv.onclick = function() {
 				aMenus[0].style.top = '-110%';
 				dGallery.style.top = '0';
-				if (oGallery === null) {
-					oGallery = new ringGallery(dGallery, cg, pn.path);
-				} else {
+				if (oGallery) {
 					oGallery.setGallery(cg, pn.path);
+				} else {
+					oGallery = new ringGallery(dGallery, cg, pn.path);
 				}
 				hashGallery = dv.id;
 				window.location.hash = hashGallery;

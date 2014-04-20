@@ -957,6 +957,10 @@ function main() {
 	dMain.focus();
 }
 
+/*
+** If call as an object (eg. from ringAlbum), allow this object to be resueable
+*/
+if (this) {
 this.setGallery = function(p, path) {
 	urlPath = path || '';
 	pics = p;
@@ -978,6 +982,7 @@ this.stopGallery = function() {
 		goFull();
 	}
 };
+}
 
 main();
 }
