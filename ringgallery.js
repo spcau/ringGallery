@@ -469,9 +469,8 @@ function gotoPic(n) {
 		dScroll.insertBefore(dd, dScroll.firstChild);
 		ipic = n == -1 ? (ipic - 1 + npics) % npics : 0;
 		clearBox(dd);
-	} else {
-		setPic(1, ipic);
 	}
+	setPic(1, ipic);
 	img = getImg(1);
 	if (n == 1 && !isHide(img.parentNode) && imgComplete(img)) {
 		setPic(2, ipic + 1);
